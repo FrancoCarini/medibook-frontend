@@ -1,0 +1,1367 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "User login",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully"
+          },
+          "401": {
+            "description": "Invalid refresh token"
+          }
+        },
+        "security": [
+          {
+            "refreshToken": []
+          }
+        ],
+        "summary": "Refresh access token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Logout successful"
+          }
+        },
+        "security": [
+          {
+            "refreshToken": []
+          }
+        ],
+        "summary": "User logout",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/doctors": {
+      "get": {
+        "operationId": "UsersController_getDoctors",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Doctors retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                    "email": "doctor@medibook.com",
+                    "firstName": "John",
+                    "lastName": "Smith",
+                    "doctor": {
+                      "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                      "licenseNumber": "MD123456",
+                      "title": "Dr.",
+                      "specialties": [
+                        {
+                          "specialty": {
+                            "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                            "name": "Cardiology"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all doctors",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/specialties": {
+      "get": {
+        "operationId": "SpecialtiesController_getSpecialties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Specialties retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                    "name": "Cardiology"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all specialties",
+        "tags": [
+          "Specialties"
+        ]
+      },
+      "post": {
+        "operationId": "SpecialtiesController_createSpecialty",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpecialtyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Specialty created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "256a3c87-b05e-4af3-ba53-6804da940973",
+                  "name": "General Medicine",
+                  "createdAt": "2025-09-02T01:49:54.579Z",
+                  "updatedAt": "2025-09-02T01:49:54.579Z"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Specialty already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new specialty",
+        "tags": [
+          "Specialties"
+        ]
+      }
+    },
+    "/specialties/{id}/doctors": {
+      "get": {
+        "operationId": "SpecialtiesController_getDoctorsBySpecialty",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctors retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                    "licenseNumber": "MD123456",
+                    "title": "Dr.",
+                    "user": {
+                      "id": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                      "firstName": "John",
+                      "lastName": "Smith",
+                      "email": "doctor@medibook.com"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Specialty not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get doctors by specialty",
+        "tags": [
+          "Specialties"
+        ]
+      }
+    },
+    "/availabilities": {
+      "post": {
+        "operationId": "AvailabilitiesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Availability created successfully"
+          },
+          "409": {
+            "description": "Availability overlap detected"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create availability",
+        "tags": [
+          "Availabilities"
+        ]
+      }
+    },
+    "/availabilities/search": {
+      "get": {
+        "operationId": "AvailabilitiesController_search",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf",
+              "type": "string"
+            }
+          },
+          {
+            "name": "specialtyId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf",
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN_PERSON",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2024-03-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "2024-03-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availabilities found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": "f1709e1b-a357-4f91-a133-863ccb921a03",
+                      "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                      "specialtyId": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                      "configId": null,
+                      "mode": "VIRTUAL",
+                      "startTime": "2025-09-06T14:00:00.000Z",
+                      "endTime": "2025-09-06T14:30:00.000Z",
+                      "durationMinutes": 30,
+                      "status": "AVAILABLE",
+                      "createdAt": "2025-08-31T01:39:16.243Z",
+                      "updatedAt": "2025-08-31T01:39:16.243Z",
+                      "doctor": {
+                        "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                        "userId": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                        "licenseNumber": "MD123456",
+                        "title": "Dr.",
+                        "user": {
+                          "firstName": "John",
+                          "lastName": "Smith"
+                        }
+                      },
+                      "specialty": {
+                        "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                        "name": "Cardiology",
+                        "createdAt": "2025-08-30T01:15:09.668Z",
+                        "updatedAt": "2025-08-30T01:15:09.668Z"
+                      }
+                    }
+                  ],
+                  "pagination": {
+                    "page": 1,
+                    "limit": 20,
+                    "total": 96,
+                    "totalPages": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search availabilities",
+        "tags": [
+          "Availabilities"
+        ]
+      }
+    },
+    "/availabilities/{id}": {
+      "get": {
+        "operationId": "AvailabilitiesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availability found"
+          },
+          "404": {
+            "description": "Availability not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get availability by ID",
+        "tags": [
+          "Availabilities"
+        ]
+      },
+      "patch": {
+        "operationId": "AvailabilitiesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Availability updated successfully"
+          },
+          "404": {
+            "description": "Availability not found"
+          },
+          "409": {
+            "description": "Availability already booked or overlap detected"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update availability",
+        "tags": [
+          "Availabilities"
+        ]
+      },
+      "delete": {
+        "operationId": "AvailabilitiesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availability deleted successfully"
+          },
+          "404": {
+            "description": "Availability not found"
+          },
+          "409": {
+            "description": "Availability already booked"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete availability",
+        "tags": [
+          "Availabilities"
+        ]
+      }
+    },
+    "/config-availabilities": {
+      "post": {
+        "operationId": "ConfigAvailabilitiesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConfigAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Config availability created successfully"
+          },
+          "409": {
+            "description": "Config availability overlap detected"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create config availability",
+        "tags": [
+          "Config Availabilities"
+        ]
+      },
+      "get": {
+        "operationId": "ConfigAvailabilitiesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Config availabilities retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all config availabilities",
+        "tags": [
+          "Config Availabilities"
+        ]
+      }
+    },
+    "/config-availabilities/{id}": {
+      "get": {
+        "operationId": "ConfigAvailabilitiesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Config availability found"
+          },
+          "404": {
+            "description": "Config availability not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get config availability by ID",
+        "tags": [
+          "Config Availabilities"
+        ]
+      },
+      "patch": {
+        "operationId": "ConfigAvailabilitiesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConfigAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Config availability updated successfully"
+          },
+          "404": {
+            "description": "Config availability not found"
+          },
+          "409": {
+            "description": "Config availability overlap detected"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update config availability",
+        "tags": [
+          "Config Availabilities"
+        ]
+      },
+      "delete": {
+        "operationId": "ConfigAvailabilitiesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Config availability deleted successfully"
+          },
+          "404": {
+            "description": "Config availability not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete config availability",
+        "tags": [
+          "Config Availabilities"
+        ]
+      }
+    },
+    "/appointments": {
+      "get": {
+        "operationId": "AppointmentsController_find",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by doctor ID",
+            "schema": {
+              "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf",
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by patient ID",
+            "schema": {
+              "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf",
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "description": "Filter by appointment mode",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN_PERSON",
+                "VIRTUAL"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by appointment status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BOOKED",
+                "CANCELLED",
+                "COMPLETED",
+                "ONGOING"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter appointments from this date",
+            "schema": {
+              "example": "2024-03-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Filter appointments until this date",
+            "schema": {
+              "example": "2024-03-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointments retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": "137d3535-1929-43c2-8825-afc896c89a04",
+                      "availabilityId": null,
+                      "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                      "patientId": "4b3c3e56-d848-43f1-a6c5-ca393c866b63",
+                      "mode": "IN_PERSON",
+                      "startTime": "2025-09-01T16:30:00.000Z",
+                      "endTime": "2025-09-01T17:00:00.000Z",
+                      "status": "CANCELLED",
+                      "createdAt": "2025-09-02T01:21:06.061Z",
+                      "updatedAt": "2025-09-02T01:27:28.229Z",
+                      "patient": {
+                        "id": "4b3c3e56-d848-43f1-a6c5-ca393c866b63",
+                        "firstName": "Jane",
+                        "lastName": "Doe",
+                        "email": "patient@medibook.com"
+                      }
+                    }
+                  ],
+                  "pagination": {
+                    "page": 1,
+                    "limit": 20,
+                    "total": 5,
+                    "totalPages": 1,
+                    "hasNext": false,
+                    "hasPrev": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search appointments",
+        "tags": [
+          "Appointments"
+        ]
+      },
+      "post": {
+        "operationId": "AppointmentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Appointment created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "137d3535-1929-43c2-8825-afc896c89a04",
+                  "availabilityId": "e9724970-f180-4b64-bd46-b796db9a9ff0",
+                  "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                  "patientId": "4b3c3e56-d848-43f1-a6c5-ca393c866b63",
+                  "mode": "IN_PERSON",
+                  "startTime": "2025-09-01T16:30:00.000Z",
+                  "endTime": "2025-09-01T17:00:00.000Z",
+                  "status": "BOOKED",
+                  "createdAt": "2025-09-02T01:21:06.061Z",
+                  "updatedAt": "2025-09-02T01:21:06.061Z",
+                  "patient": {
+                    "id": "4b3c3e56-d848-43f1-a6c5-ca393c866b63",
+                    "firstName": "Jane",
+                    "lastName": "Doe",
+                    "email": "patient@medibook.com"
+                  },
+                  "doctor": {
+                    "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                    "userId": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                    "licenseNumber": "MD123456",
+                    "title": "Dr.",
+                    "user": {
+                      "id": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                      "firstName": "John",
+                      "lastName": "Smith",
+                      "email": "doctor@medibook.com"
+                    }
+                  },
+                  "availability": {
+                    "id": "e9724970-f180-4b64-bd46-b796db9a9ff0",
+                    "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                    "specialtyId": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                    "configId": "3ce56273-3bb9-48cb-b8bd-d3353fb019d4",
+                    "mode": "IN_PERSON",
+                    "startTime": "2025-09-01T16:30:00.000Z",
+                    "endTime": "2025-09-01T17:00:00.000Z",
+                    "durationMinutes": 30,
+                    "status": "BOOKED",
+                    "createdAt": "2025-08-30T01:26:26.464Z",
+                    "updatedAt": "2025-09-02T01:21:06.055Z",
+                    "specialty": {
+                      "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                      "name": "Cardiology",
+                      "createdAt": "2025-08-30T01:15:09.668Z",
+                      "updatedAt": "2025-08-30T01:15:09.668Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Availability not found"
+          },
+          "409": {
+            "description": "Availability already booked or appointment conflict"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create appointment",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/appointments/{id}/cancel": {
+      "patch": {
+        "operationId": "AppointmentsController_cancelAppointment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment cancelled successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "137d3535-1929-43c2-8825-afc896c89a04",
+                  "availabilityId": "e9724970-f180-4b64-bd46-b796db9a9ff0",
+                  "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                  "patientId": "4b3c3e56-d848-43f1-a6c5-ca393c866b63",
+                  "mode": "IN_PERSON",
+                  "startTime": "2025-09-01T16:30:00.000Z",
+                  "endTime": "2025-09-01T17:00:00.000Z",
+                  "status": "BOOKED",
+                  "createdAt": "2025-09-02T01:21:06.061Z",
+                  "updatedAt": "2025-09-02T01:21:06.061Z",
+                  "patient": {
+                    "id": "4b3c3e56-d848-43f1-a6c5-ca393c866b63",
+                    "firstName": "Jane",
+                    "lastName": "Doe",
+                    "email": "patient@medibook.com"
+                  },
+                  "doctor": {
+                    "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                    "userId": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                    "licenseNumber": "MD123456",
+                    "title": "Dr.",
+                    "user": {
+                      "id": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                      "firstName": "John",
+                      "lastName": "Smith",
+                      "email": "doctor@medibook.com"
+                    }
+                  },
+                  "availability": {
+                    "id": "e9724970-f180-4b64-bd46-b796db9a9ff0",
+                    "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                    "specialtyId": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                    "configId": "3ce56273-3bb9-48cb-b8bd-d3353fb019d4",
+                    "mode": "IN_PERSON",
+                    "startTime": "2025-09-01T16:30:00.000Z",
+                    "endTime": "2025-09-01T17:00:00.000Z",
+                    "durationMinutes": 30,
+                    "status": "BOOKED",
+                    "createdAt": "2025-08-30T01:26:26.464Z",
+                    "updatedAt": "2025-09-02T01:21:06.055Z",
+                    "specialty": {
+                      "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                      "name": "Cardiology",
+                      "createdAt": "2025-08-30T01:15:09.668Z",
+                      "updatedAt": "2025-08-30T01:15:09.668Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Appointment not found"
+          },
+          "409": {
+            "description": "Cannot cancel appointment"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel appointment",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "MediBook API",
+    "description": "Medical appointment booking system API",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refreshToken"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "johndoe@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "DoctorDataDto": {
+        "type": "object",
+        "properties": {
+          "licenseNumber": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "licenseNumber",
+          "title"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "johndoe@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "minLength": 6
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "DOCTOR",
+              "PATIENT"
+            ],
+            "example": "PATIENT"
+          },
+          "doctorData": {
+            "$ref": "#/components/schemas/DoctorDataDto"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "firstName",
+          "lastName",
+          "role"
+        ]
+      },
+      "CreateSpecialtyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Cardiology"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "specialtyId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIRTUAL"
+            ]
+          },
+          "startTime": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 30
+          }
+        },
+        "required": [
+          "doctorId",
+          "specialtyId",
+          "mode",
+          "startTime",
+          "endTime",
+          "durationMinutes"
+        ]
+      },
+      "UpdateAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "specialtyId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIRTUAL"
+            ]
+          },
+          "startTime": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 30
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "BOOKED",
+              "CANCELLED"
+            ]
+          }
+        }
+      },
+      "CreateConfigAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "specialtyId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIRTUAL"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "startHour": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "endHour": {
+            "type": "string",
+            "example": "17:00"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 30
+          },
+          "daysOfWeek": {
+            "description": "Days of week (1=Monday, 7=Sunday)",
+            "example": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "doctorId",
+          "specialtyId",
+          "mode",
+          "startDate",
+          "startHour",
+          "endHour",
+          "durationMinutes",
+          "daysOfWeek"
+        ]
+      },
+      "UpdateConfigAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "specialtyId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "IN_PERSON",
+              "VIRTUAL"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2024-03-15T10:30:00.000Z"
+          },
+          "startHour": {
+            "type": "string",
+            "example": "09:00"
+          },
+          "endHour": {
+            "type": "string",
+            "example": "17:00"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 30
+          },
+          "daysOfWeek": {
+            "description": "Days of week (1=Monday, 7=Sunday)",
+            "example": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "CreateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "availabilityId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf",
+            "description": "ID of the availability slot to book"
+          },
+          "patientId": {
+            "type": "string",
+            "example": "3bc62326-f9ec-4a95-9ae1-51f8ba3d03bf",
+            "description": "Patient ID (only for ADMIN/DOCTOR roles, PATIENT uses token)"
+          }
+        },
+        "required": [
+          "availabilityId"
+        ]
+      }
+    }
+  }
+}

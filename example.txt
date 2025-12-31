@@ -1,0 +1,95 @@
+GET -> config-availabilities
+
+[
+  {
+    "id": "05ebfe52-4aa9-4762-b381-e47aa37a37f0",
+    "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+    "specialtyId": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+    "mode": "IN_PERSON",
+    "startDate": "2025-12-12T00:00:00.000Z",
+    "endDate": null,
+    "startHour": "11:00",
+    "endHour": "16:00",
+    "durationMinutes": 30,
+    "daysOfWeek": [
+      5
+    ],
+    "createdAt": "2025-12-05T23:31:18.476Z",
+    "updatedAt": "2025-12-05T23:31:18.476Z",
+    "doctor": {
+      "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+      "userId": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+      "licenseNumber": "MD123456",
+      "title": "Dr.",
+      "user": {
+        "firstName": "John",
+        "lastName": "Smith"
+      }
+    },
+    "specialty": {
+      "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+      "name": "Cardiology",
+      "createdAt": "2025-08-30T01:15:09.668Z",
+      "updatedAt": "2025-08-30T01:15:09.668Z"
+    },
+    "availabilities": [
+      {
+        "id": "23ed1616-4e9c-49e5-8252-ce9d5d04111b",
+        "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+        "specialtyId": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+        "configId": "05ebfe52-4aa9-4762-b381-e47aa37a37f0",
+        "mode": "IN_PERSON",
+        "startTime": "2025-12-12T14:00:00.000Z",
+        "endTime": "2025-12-12T14:30:00.000Z",
+        "durationMinutes": 30,
+        "status": "BOOKED",
+        "createdAt": "2025-12-05T23:31:18.601Z",
+        "updatedAt": "2025-12-05T23:33:28.758Z"
+      },
+    ]
+  }
+]
+
+
+ GET -> /availabilities/search?doctorId=40d40017-60c6-49b6-af0e-dd2dd0ba6d2f
+
+
+{
+    "data": [
+        {
+            "id": "b8111419-1762-452f-befb-0d6c4ffc26b3",
+            "doctorId": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+            "specialtyId": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+            "configId": null,
+            "mode": "IN_PERSON",
+            "startTime": "2025-12-08T15:00:00.000Z",
+            "endTime": "2025-12-08T15:30:00.000Z",
+            "durationMinutes": 30,
+            "status": "AVAILABLE",
+            "createdAt": "2025-12-05T23:03:33.040Z",
+            "updatedAt": "2025-12-05T23:03:33.040Z",
+            "doctor": {
+                "id": "40d40017-60c6-49b6-af0e-dd2dd0ba6d2f",
+                "userId": "363c4c0c-c8b8-486b-9c82-958a46886e22",
+                "licenseNumber": "MD123456",
+                "title": "Dr.",
+                "user": {
+                    "firstName": "John",
+                    "lastName": "Smith"
+                }
+            },
+            "specialty": {
+                "id": "c04c03bd-de93-487e-bdcc-f62b33588e89",
+                "name": "Cardiology",
+                "createdAt": "2025-08-30T01:15:09.668Z",
+                "updatedAt": "2025-08-30T01:15:09.668Z"
+            }
+        },
+    ],
+    "pagination": {
+        "page": 1,
+        "limit": 20,
+        "total": 61,
+        "totalPages": 4
+    }
+}
