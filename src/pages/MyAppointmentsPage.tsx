@@ -19,7 +19,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  Paper
 } from '@mui/material';
 import {
   LocalHospital,
@@ -28,7 +30,10 @@ import {
   Person,
   AccessTime,
   Cancel,
-  Refresh
+  Refresh,
+  FilterList,
+  Clear,
+  Search
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
@@ -62,62 +67,99 @@ export const MyAppointmentsPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [tabValue, setTabValue] = useState(0);
-  const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
-  const [pastAppointments, setPastAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [cancelDialog, setCancelDialog] = useState<{ open: boolean; appointmentId: string | null }>({
     open: false,
     appointmentId: null
   });
 
-  const getTodayDateString = () => {
+  // Pagination state
+  const [pagination, setPagination] = useState<{ hasNext: boolean; page: number }>({
+    hasNext: false,
+    page: 1
+  });
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Filter states
+  const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
-  };
-
-  const getYesterdayDateString = () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
-  };
+  });
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     loadAppointments();
   }, []);
 
-  const loadAppointments = async () => {
-    setLoading(true);
+  const loadAppointments = async (page: number = 1, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
-      const today = getTodayDateString();
-      const yesterday = getYesterdayDateString();
+      const searchParams: any = {
+        limit: 1,
+        page
+      };
 
-      // Cargar próximas citas (de hoy en adelante)
-      const upcomingResponse = await appointmentsService.search({
-        startDate: today,
-        limit: 100
-      });
-      setUpcomingAppointments(upcomingResponse.data);
+      if (startDate) {
+        searchParams.startDate = startDate;
+      }
+      if (endDate) {
+        searchParams.endDate = endDate;
+      }
 
-      // Cargar historial (antes de hoy)
-      const pastResponse = await appointmentsService.search({
-        endDate: yesterday,
-        limit: 100
+      const response = await appointmentsService.search(searchParams);
+
+      const sortedAppointments = response.data.sort((a, b) =>
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+      );
+
+      if (append) {
+        setAppointments(prev => [...prev, ...sortedAppointments]);
+      } else {
+        setAppointments(sortedAppointments);
+      }
+
+      setPagination({
+        hasNext: response.pagination.hasNext,
+        page: response.pagination.page
       });
-      setPastAppointments(pastResponse.data);
     } catch (error) {
       console.error('Error al cargar citas:', error);
       showError('Error al cargar las citas');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const loadMoreAppointments = () => {
+    loadAppointments(pagination.page + 1, true);
+  };
+
+  const handleClearFilters = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setStartDate(today);
+    setEndDate('');
+  };
+
+  const filterAppointments = (statuses: string[] = []) => {
+    if (statuses.length === 0) return appointments;
+    return appointments.filter(apt => statuses.includes(apt.status));
+  };
+
+  const upcomingAppointments = filterAppointments(['BOOKED', 'ONGOING']);
+  const pastAppointments = filterAppointments(['COMPLETED', 'CANCELLED']);
 
   const handleCancelAppointment = async (appointmentId: string) => {
     try {
       await appointmentsService.cancel(appointmentId);
 
-      // Actualizar la lista de próximas citas
-      setUpcomingAppointments(prev =>
+      setAppointments(prev =>
         prev.map(apt =>
           apt.id === appointmentId
             ? { ...apt, status: 'CANCELLED' as const }
@@ -269,8 +311,62 @@ export const MyAppointmentsPage: React.FC = () => {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        {/* Filters Section */}
+        <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
+          <Box display="flex" alignItems="center" mb={2}>
+            <FilterList sx={{ mr: 1 }} />
+            <Typography variant="h6">Filtros</Typography>
+          </Box>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={4} md={3}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Fecha desde"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={4} md={3}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Fecha hasta"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
+              <Button
+                variant="contained"
+                startIcon={<Search />}
+                onClick={() => loadAppointments()}
+                size="small"
+                fullWidth
+              >
+                Buscar
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
+              <Button
+                variant="outlined"
+                startIcon={<Clear />}
+                onClick={handleClearFilters}
+                size="small"
+                fullWidth
+              >
+                Limpiar
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
+
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)}>
             <Tab label={`Próximas (${upcomingAppointments.length})`} />
             <Tab label={`Historial (${pastAppointments.length})`} />
           </Tabs>
@@ -282,11 +378,25 @@ export const MyAppointmentsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : upcomingAppointments.length > 0 ? (
-            <Grid container spacing={2}>
-              {upcomingAppointments.map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={2}>
+                {upcomingAppointments.map((appointment) => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
+              </Grid>
+              {pagination.hasNext && (
+                <Box display="flex" justifyContent="center" mt={3}>
+                  <Button
+                    variant="outlined"
+                    onClick={loadMoreAppointments}
+                    disabled={loadingMore}
+                    startIcon={loadingMore ? <CircularProgress size={20} /> : null}
+                  >
+                    {loadingMore ? 'Cargando...' : 'Ver más'}
+                  </Button>
+                </Box>
+              )}
+            </>
           ) : (
             <Alert severity="info">
               No tienes citas próximas.
@@ -307,11 +417,25 @@ export const MyAppointmentsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : pastAppointments.length > 0 ? (
-            <Grid container spacing={2}>
-              {pastAppointments.map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={2}>
+                {pastAppointments.map((appointment) => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
+              </Grid>
+              {pagination.hasNext && (
+                <Box display="flex" justifyContent="center" mt={3}>
+                  <Button
+                    variant="outlined"
+                    onClick={loadMoreAppointments}
+                    disabled={loadingMore}
+                    startIcon={loadingMore ? <CircularProgress size={20} /> : null}
+                  >
+                    {loadingMore ? 'Cargando...' : 'Ver más'}
+                  </Button>
+                </Box>
+              )}
+            </>
           ) : (
             <Alert severity="info">
               No tienes citas en el historial.
