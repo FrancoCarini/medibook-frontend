@@ -76,6 +76,17 @@ export const DoctorAppointmentsPage: React.FC = () => {
     open: false,
     appointmentId: null
   });
+  const [completeDialog, setCompleteDialog] = useState<{ open: boolean; appointmentId: string | null }>({
+    open: false,
+    appointmentId: null
+  });
+
+  // Pagination state
+  const [pagination, setPagination] = useState<{ hasNext: boolean; page: number }>({
+    hasNext: false,
+    page: 1
+  });
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Filter states
   const [startDate, setStartDate] = useState(() => {
@@ -88,17 +99,23 @@ export const DoctorAppointmentsPage: React.FC = () => {
     loadAppointments();
   }, []); // Load initial appointments only
 
-  const loadAppointments = async () => {
+  const loadAppointments = async (page: number = 1, append: boolean = false) => {
     if (!user?.doctorId) {
       console.error('No doctor ID found for user');
       return;
     }
 
-    setLoading(true);
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const searchParams: any = {
         doctorId: user.doctorId,
-        limit: 100
+        limit: 20,
+        page
       };
 
       // Add date filters
@@ -110,18 +127,32 @@ export const DoctorAppointmentsPage: React.FC = () => {
       }
 
       const response = await appointmentsService.search(searchParams);
-      
+
       // Sort by start time descending (most recent first)
-      const sortedAppointments = response.data.sort((a, b) => 
+      const sortedAppointments = response.data.sort((a, b) =>
         new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
       );
-      
-      setAppointments(sortedAppointments);
+
+      if (append) {
+        setAppointments(prev => [...prev, ...sortedAppointments]);
+      } else {
+        setAppointments(sortedAppointments);
+      }
+
+      setPagination({
+        hasNext: response.pagination.hasNext,
+        page: response.pagination.page
+      });
     } catch (error) {
       console.error('Error al cargar citas:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMoreAppointments = () => {
+    loadAppointments(pagination.page + 1, true);
   };
 
   const handleClearFilters = () => {
@@ -133,20 +164,40 @@ export const DoctorAppointmentsPage: React.FC = () => {
   const handleCancelAppointment = async (appointmentId: string) => {
     try {
       await appointmentsService.cancel(appointmentId);
-      
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === appointmentId 
+
+      setAppointments(prev =>
+        prev.map(apt =>
+          apt.id === appointmentId
             ? { ...apt, status: AppointmentStatus.CANCELLED }
             : apt
         )
       );
-      
+
       setCancelDialog({ open: false, appointmentId: null });
       showSuccess('Cita cancelada exitosamente');
     } catch (error) {
       console.error('Error al cancelar cita:', error);
       showError('Error al cancelar la cita');
+    }
+  };
+
+  const handleCompleteAppointment = async (appointmentId: string) => {
+    try {
+      await appointmentsService.complete(appointmentId);
+
+      setAppointments(prev =>
+        prev.map(apt =>
+          apt.id === appointmentId
+            ? { ...apt, status: AppointmentStatus.COMPLETED }
+            : apt
+        )
+      );
+
+      setCompleteDialog({ open: false, appointmentId: null });
+      showSuccess('Cita marcada como completada');
+    } catch (error) {
+      console.error('Error al completar cita:', error);
+      showError('Error al completar la cita');
     }
   };
 
@@ -256,10 +307,7 @@ export const DoctorAppointmentsPage: React.FC = () => {
                         color="success"
                         size="small"
                         startIcon={<CheckCircle />}
-                        onClick={() => {
-                          // TODO: Implement mark as completed functionality
-                          console.log('Mark as completed:', appointment.id);
-                        }}
+                        onClick={() => setCompleteDialog({ open: true, appointmentId: appointment.id })}
                       >
                         Completar
                       </Button>
@@ -377,11 +425,25 @@ export const DoctorAppointmentsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : upcomingAppointments.length > 0 ? (
-            <Grid container spacing={2}>
-              {upcomingAppointments.map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={2}>
+                {upcomingAppointments.map((appointment) => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
+              </Grid>
+              {pagination.hasNext && (
+                <Box display="flex" justifyContent="center" mt={3}>
+                  <Button
+                    variant="outlined"
+                    onClick={loadMoreAppointments}
+                    disabled={loadingMore}
+                    startIcon={loadingMore ? <CircularProgress size={20} /> : null}
+                  >
+                    {loadingMore ? 'Cargando...' : 'Ver más'}
+                  </Button>
+                </Box>
+              )}
+            </>
           ) : (
             <Alert severity="info">
               No tienes citas próximas programadas.
@@ -395,11 +457,25 @@ export const DoctorAppointmentsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : pastAppointments.length > 0 ? (
-            <Grid container spacing={2}>
-              {pastAppointments.map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={2}>
+                {pastAppointments.map((appointment) => (
+                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                ))}
+              </Grid>
+              {pagination.hasNext && (
+                <Box display="flex" justifyContent="center" mt={3}>
+                  <Button
+                    variant="outlined"
+                    onClick={loadMoreAppointments}
+                    disabled={loadingMore}
+                    startIcon={loadingMore ? <CircularProgress size={20} /> : null}
+                  >
+                    {loadingMore ? 'Cargando...' : 'Ver más'}
+                  </Button>
+                </Box>
+              )}
+            </>
           ) : (
             <Alert severity="info">
               No tienes citas en el historial.
@@ -422,12 +498,36 @@ export const DoctorAppointmentsPage: React.FC = () => {
           <Button onClick={() => setCancelDialog({ open: false, appointmentId: null })}>
             No, mantener cita
           </Button>
-          <Button 
+          <Button
             onClick={() => handleCancelAppointment(cancelDialog.appointmentId!)}
             color="error"
             autoFocus
           >
             Sí, cancelar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={completeDialog.open}
+        onClose={() => setCompleteDialog({ open: false, appointmentId: null })}
+      >
+        <DialogTitle>Completar Cita</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que deseas marcar esta cita como completada?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCompleteDialog({ open: false, appointmentId: null })}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => handleCompleteAppointment(completeDialog.appointmentId!)}
+            color="success"
+            autoFocus
+          >
+            Sí, completar
           </Button>
         </DialogActions>
       </Dialog>

@@ -40,6 +40,11 @@ export const appointmentsService = {
     return response;
   },
 
+  async complete(id: string): Promise<Appointment> {
+    const response = await apiService.patch<Appointment>(`/appointments/${id}/complete`);
+    return response;
+  },
+
   async search(params: SearchAppointmentsDto): Promise<AppointmentsResponse> {
     const queryParams = new URLSearchParams();
     

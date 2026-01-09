@@ -162,22 +162,19 @@ export const AvailabilityManagementPage: React.FC = () => {
     }
   };
 
-  const handleAvailabilityDeleted = async () => {
+  const handleAvailabilityDeleted = async (deletedId: string) => {
+    // Update modal availabilities immediately (remove the deleted one)
+    const updatedModalAvailabilities = dayModalAvailabilities.filter(a => a.id !== deletedId);
+
+    if (updatedModalAvailabilities.length === 0) {
+      handleDayModalClose();
+    } else {
+      setDayModalAvailabilities(updatedModalAvailabilities);
+    }
+
     // Refresh availabilities for current month after deletion
     if (currentMonthRange) {
       await fetchAvailabilitiesForMonth(currentMonthRange.startDate, currentMonthRange.endDate);
-    }
-    // Update modal availabilities if still open
-    if (dayModalOpen && dayModalDate) {
-      const updatedDayAvailabilities = availabilities.filter(a => {
-        const availDate = new Date(a.startTime);
-        return availDate.toDateString() === dayModalDate.toDateString();
-      });
-      if (updatedDayAvailabilities.length === 0) {
-        handleDayModalClose();
-      } else {
-        setDayModalAvailabilities(updatedDayAvailabilities);
-      }
     }
   };
 

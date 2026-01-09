@@ -18,7 +18,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  CircularProgress
 } from '@mui/material';
 import {
   LocalHospital,
@@ -32,6 +33,8 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import { useNavigate } from 'react-router-dom';
+import { appointmentsService } from '../services/appointments';
+import type { Appointment } from '../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -57,51 +60,26 @@ export const MyAppointmentsPage: React.FC = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useUI();
   const navigate = useNavigate();
-  
+
   const [tabValue, setTabValue] = useState(0);
-  const [appointments, setAppointments] = useState([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
+  const [pastAppointments, setPastAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [cancelDialog, setCancelDialog] = useState<{ open: boolean; appointmentId: string | null }>({
     open: false,
     appointmentId: null
   });
 
-  // Mock data - reemplazar con llamada real a la API
-  const mockAppointments = [
-    {
-      id: '1',
-      doctor: { firstName: 'Dr. Juan', lastName: 'Pérez' },
-      specialty: { name: 'Cardiología' },
-      date: '2024-01-20',
-      startTime: '09:00',
-      endTime: '09:30',
-      status: 'BOOKED',
-      modality: 'IN_PERSON',
-      createdAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      doctor: { firstName: 'Dr. María', lastName: 'González' },
-      specialty: { name: 'Dermatología' },
-      date: '2024-01-18',
-      startTime: '10:00',
-      endTime: '10:30',
-      status: 'COMPLETED',
-      modality: 'VIRTUAL',
-      createdAt: '2024-01-10'
-    },
-    {
-      id: '3',
-      doctor: { firstName: 'Dr. Carlos', lastName: 'Martínez' },
-      specialty: { name: 'Neurología' },
-      date: '2024-01-10',
-      startTime: '15:00',
-      endTime: '15:30',
-      status: 'CANCELLED',
-      modality: 'IN_PERSON',
-      createdAt: '2024-01-05'
-    }
-  ];
+  const getTodayDateString = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  const getYesterdayDateString = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+  };
 
   useEffect(() => {
     loadAppointments();
@@ -110,34 +88,43 @@ export const MyAppointmentsPage: React.FC = () => {
   const loadAppointments = async () => {
     setLoading(true);
     try {
-      // TODO: Implementar carga real de citas desde API
-      // const data = await getMyAppointments();
-      // setAppointments(data);
-      
-      // Mock data por ahora
-      setTimeout(() => {
-        setAppointments(mockAppointments);
-        setLoading(false);
-      }, 1000);
+      const today = getTodayDateString();
+      const yesterday = getYesterdayDateString();
+
+      // Cargar próximas citas (de hoy en adelante)
+      const upcomingResponse = await appointmentsService.search({
+        startDate: today,
+        limit: 100
+      });
+      setUpcomingAppointments(upcomingResponse.data);
+
+      // Cargar historial (antes de hoy)
+      const pastResponse = await appointmentsService.search({
+        endDate: yesterday,
+        limit: 100
+      });
+      setPastAppointments(pastResponse.data);
     } catch (error) {
       console.error('Error al cargar citas:', error);
+      showError('Error al cargar las citas');
+    } finally {
       setLoading(false);
     }
   };
 
   const handleCancelAppointment = async (appointmentId: string) => {
     try {
-      // TODO: Implementar cancelación de cita
-      // await cancelAppointment(appointmentId);
-      
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === appointmentId 
-            ? { ...apt, status: 'CANCELLED' }
+      await appointmentsService.cancel(appointmentId);
+
+      // Actualizar la lista de próximas citas
+      setUpcomingAppointments(prev =>
+        prev.map(apt =>
+          apt.id === appointmentId
+            ? { ...apt, status: 'CANCELLED' as const }
             : apt
         )
       );
-      
+
       setCancelDialog({ open: false, appointmentId: null });
       showSuccess('Cita cancelada exitosamente');
     } catch (error) {
@@ -166,15 +153,38 @@ export const MyAppointmentsPage: React.FC = () => {
     }
   };
 
-  const filterAppointments = (status: string[] = []) => {
-    if (status.length === 0) return appointments;
-    return appointments.filter(apt => status.includes(apt.status));
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-AR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
-  const upcomingAppointments = filterAppointments(['BOOKED', 'ONGOING']);
-  const pastAppointments = filterAppointments(['COMPLETED', 'CANCELLED']);
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-  const AppointmentCard = ({ appointment }: { appointment: any }) => (
+  const getDoctorName = (appointment: Appointment) => {
+    if (appointment.doctor?.user) {
+      const { title } = appointment.doctor;
+      const { firstName, lastName } = appointment.doctor.user;
+      return `${title || ''} ${firstName} ${lastName}`.trim();
+    }
+    return 'Doctor no disponible';
+  };
+
+  const getSpecialtyName = (appointment: Appointment) => {
+    return appointment.availability?.specialty?.name || 'Especialidad no disponible';
+  };
+
+  const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
     <Grid item xs={12} md={6} key={appointment.id}>
       <Card>
         <CardContent>
@@ -183,42 +193,42 @@ export const MyAppointmentsPage: React.FC = () => {
               <Box display="flex" alignItems="center">
                 <Person sx={{ mr: 1 }} />
                 <Typography variant="h6">
-                  {appointment.doctor.firstName} {appointment.doctor.lastName}
+                  {getDoctorName(appointment)}
                 </Typography>
               </Box>
-              <Chip 
+              <Chip
                 label={getStatusLabel(appointment.status)}
                 color={getStatusColor(appointment.status)}
                 size="small"
               />
             </Box>
-            
+
             <Typography variant="body2" color="text.secondary">
-              {appointment.specialty.name}
+              {getSpecialtyName(appointment)}
             </Typography>
-            
+
             <Box display="flex" alignItems="center">
               <CalendarMonth sx={{ mr: 1 }} />
               <Typography variant="body2">
-                {appointment.date}
+                {formatDate(appointment.startTime)}
               </Typography>
             </Box>
-            
+
             <Box display="flex" alignItems="center">
               <AccessTime sx={{ mr: 1 }} />
               <Typography variant="body2">
-                {appointment.startTime} - {appointment.endTime}
+                {formatTime(appointment.startTime)} - {formatTime(appointment.endTime)}
               </Typography>
             </Box>
-            
+
             <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Chip 
-                label={appointment.modality === 'IN_PERSON' ? 'Presencial' : 'Virtual'}
-                color={appointment.modality === 'IN_PERSON' ? 'primary' : 'secondary'}
+              <Chip
+                label={appointment.mode === 'IN_PERSON' ? 'Presencial' : 'Virtual'}
+                color={appointment.mode === 'IN_PERSON' ? 'primary' : 'secondary'}
                 size="small"
                 variant="outlined"
               />
-              
+
               {appointment.status === 'BOOKED' && (
                 <Button
                   variant="outlined"
@@ -268,7 +278,9 @@ export const MyAppointmentsPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={0}>
           {loading ? (
-            <Alert severity="info">Cargando citas...</Alert>
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
           ) : upcomingAppointments.length > 0 ? (
             <Grid container spacing={2}>
               {upcomingAppointments.map((appointment) => (
@@ -277,9 +289,9 @@ export const MyAppointmentsPage: React.FC = () => {
             </Grid>
           ) : (
             <Alert severity="info">
-              No tienes citas próximas. 
-              <Button 
-                variant="text" 
+              No tienes citas próximas.
+              <Button
+                variant="text"
                 onClick={() => navigate('/book-appointment')}
                 sx={{ ml: 1 }}
               >
@@ -291,7 +303,9 @@ export const MyAppointmentsPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={1}>
           {loading ? (
-            <Alert severity="info">Cargando historial...</Alert>
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
           ) : pastAppointments.length > 0 ? (
             <Grid container spacing={2}>
               {pastAppointments.map((appointment) => (

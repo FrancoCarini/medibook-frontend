@@ -65,6 +65,7 @@ export interface Availability {
   updatedAt: string;
   doctor?: Doctor;
   specialty?: Specialty;
+  appointment?: Appointment | null;
 }
 
 export interface ConfigAvailability {

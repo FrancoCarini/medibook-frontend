@@ -49,4 +49,9 @@ export const configAvailabilitiesService = {
   async delete(id: string): Promise<void> {
     await apiService.delete(`/config-availabilities/${id}`);
   },
+
+  async getAppointmentsCount(id: string): Promise<{ count: number }> {
+    const response = await apiService.get<{ count: number }>(`/config-availabilities/${id}/appointments-count`);
+    return response;
+  },
 };

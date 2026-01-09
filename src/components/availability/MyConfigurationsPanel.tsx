@@ -38,12 +38,15 @@ export const MyConfigurationsPanel: React.FC<MyConfigurationsPanelProps> = ({
     open: boolean;
     id: string;
     title: string;
+    appointmentsCount: number;
   }>({
     open: false,
     id: '',
-    title: ''
+    title: '',
+    appointmentsCount: 0
   });
   const [loading, setLoading] = useState(false);
+  const [loadingCount, setLoadingCount] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
@@ -52,7 +55,7 @@ export const MyConfigurationsPanel: React.FC<MyConfigurationsPanelProps> = ({
       setError(null);
       await configAvailabilitiesService.delete(deleteDialog.id);
       onUpdate();
-      setDeleteDialog({ open: false, id: '', title: '' });
+      setDeleteDialog({ open: false, id: '', title: '', appointmentsCount: 0 });
     } catch (error: any) {
       setError(error.message || 'Error al eliminar');
     } finally {
@@ -81,9 +84,18 @@ export const MyConfigurationsPanel: React.FC<MyConfigurationsPanelProps> = ({
     return daysOfWeek.map(day => dayNames[day === 7 ? 0 : day]).join(', ');
   };
 
-  const openDeleteDialog = (id: string, title: string) => {
-    setDeleteDialog({ open: true, id, title });
+  const openDeleteDialog = async (id: string, title: string) => {
+    setDeleteDialog({ open: true, id, title, appointmentsCount: 0 });
     setError(null);
+    setLoadingCount(true);
+    try {
+      const { count } = await configAvailabilitiesService.getAppointmentsCount(id);
+      setDeleteDialog(prev => ({ ...prev, appointmentsCount: count }));
+    } catch {
+      // Si falla, continuamos sin el count
+    } finally {
+      setLoadingCount(false);
+    }
   };
 
   return (
@@ -162,7 +174,7 @@ export const MyConfigurationsPanel: React.FC<MyConfigurationsPanelProps> = ({
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, id: '', title: '' })}
+        onClose={() => setDeleteDialog({ open: false, id: '', title: '', appointmentsCount: 0 })}
       >
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
@@ -172,13 +184,24 @@ export const MyConfigurationsPanel: React.FC<MyConfigurationsPanelProps> = ({
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {deleteDialog.title}
           </Typography>
-          <Alert severity="warning" sx={{ mt: 2 }}>
-            Al eliminar una agenda recurrente, no se eliminarán las disponibilidades ya generadas.
-          </Alert>
+          {loadingCount ? (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Verificando turnos...
+            </Typography>
+          ) : deleteDialog.appointmentsCount > 0 ? (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              Esta agenda tiene {deleteDialog.appointmentsCount} turno{deleteDialog.appointmentsCount > 1 ? 's' : ''} reservado{deleteDialog.appointmentsCount > 1 ? 's' : ''}.
+              Al eliminarla, se cancelarán todos los turnos y se eliminarán las disponibilidades asociadas.
+            </Alert>
+          ) : (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              Esta acción eliminará todas las disponibilidades asociadas a esta agenda.
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setDeleteDialog({ open: false, id: '', title: '' })}
+            onClick={() => setDeleteDialog({ open: false, id: '', title: '', appointmentsCount: 0 })}
             disabled={loading}
           >
             Cancelar

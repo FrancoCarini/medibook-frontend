@@ -4,6 +4,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  DialogContentText,
   Button,
   List,
   ListItem,
@@ -21,11 +22,13 @@ import {
   Add,
   LocationOn,
   VideoCall,
-  AccessTime
+  AccessTime,
+  Warning
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { availabilitiesService } from '../../services/availabilities';
+import { useUI } from '../../contexts/UIContext';
 import type { Availability, AppointmentMode, AvailabilityStatus } from '../../types';
 
 interface DayAvailabilitiesModalProps {
@@ -33,7 +36,7 @@ interface DayAvailabilitiesModalProps {
   date: Date | null;
   availabilities: Availability[];
   onClose: () => void;
-  onAvailabilityDeleted: () => void;
+  onAvailabilityDeleted: (deletedId: string) => void;
   onAddAvailability: (date: Date) => void;
 }
 
@@ -45,21 +48,39 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
   onAvailabilityDeleted,
   onAddAvailability
 }) => {
+  const { showSuccess } = useUI();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const handleDelete = async (availabilityId: string) => {
+  const handleDeleteClick = (availabilityId: string) => {
+    setConfirmDeleteId(availabilityId);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDeleteId) return;
+
     try {
-      setLoading(availabilityId);
+      setLoading(confirmDeleteId);
       setError(null);
-      await availabilitiesService.delete(availabilityId);
-      onAvailabilityDeleted();
+      setConfirmDeleteId(null);
+      await availabilitiesService.delete(confirmDeleteId);
+      showSuccess('Disponibilidad eliminada correctamente');
+      onAvailabilityDeleted(confirmDeleteId);
     } catch (err: any) {
       setError(err.message || 'Error al eliminar la disponibilidad');
     } finally {
       setLoading(null);
     }
   };
+
+  const availabilityToDelete = confirmDeleteId
+    ? availabilities.find(a => a.id === confirmDeleteId)
+    : null;
 
   const getModeIcon = (mode: AppointmentMode) => {
     return mode === 'VIRTUAL' ? <VideoCall fontSize="small" /> : <LocationOn fontSize="small" />;
@@ -178,10 +199,10 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
                   ) : (
                     <IconButton
                       edge="end"
-                      onClick={() => handleDelete(availability.id)}
+                      onClick={() => handleDeleteClick(availability.id)}
                       color="error"
-                      disabled={availability.status === 'BOOKED' || loading !== null}
-                      title={availability.status === 'BOOKED' ? 'No se puede eliminar una disponibilidad reservada' : 'Eliminar'}
+                      disabled={loading !== null}
+                      title="Eliminar disponibilidad"
                     >
                       <Delete />
                     </IconButton>
@@ -204,6 +225,56 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
           Cerrar
         </Button>
       </DialogActions>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDeleteId !== null}
+        onClose={handleCancelDelete}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro que deseas eliminar esta disponibilidad?
+          </DialogContentText>
+          {availabilityToDelete && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Typography variant="body2">
+                <strong>Horario:</strong> {formatTime(availabilityToDelete.startTime)} - {formatTime(availabilityToDelete.endTime)}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Especialidad:</strong> {availabilityToDelete.specialty?.name}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Modalidad:</strong> {getModeLabel(availabilityToDelete.mode)}
+              </Typography>
+            </Box>
+          )}
+          {availabilityToDelete?.appointment && (
+            <Alert
+              severity="warning"
+              icon={<Warning />}
+              sx={{ mt: 2 }}
+            >
+              <Typography variant="body2" fontWeight="bold">
+                Esta disponibilidad tiene un turno reservado
+              </Typography>
+              <Typography variant="body2">
+                Al eliminarla, el turno también será cancelado.
+              </Typography>
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="inherit">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };
