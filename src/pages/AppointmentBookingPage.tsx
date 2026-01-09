@@ -58,7 +58,7 @@ export const AppointmentBookingPage: React.FC = () => {
   };
   
   const [specialty, setSpecialty] = useState('');
-  const [mode, setMode] = useState('');
+  const [mode, setMode] = useState('ALL');
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [searchResults, setSearchResults] = useState<Availability[]>([]);
   const [groupedResults, setGroupedResults] = useState<{[key: string]: Availability[]}>({});
@@ -96,7 +96,7 @@ export const AppointmentBookingPage: React.FC = () => {
         limit: 20
       };
       
-      if (mode) searchParams.mode = mode;
+      if (mode && mode !== 'ALL') searchParams.mode = mode;
       if (startDate) searchParams.startDate = startDate;
       if (endDate) searchParams.endDate = endDate;
       
@@ -249,7 +249,7 @@ export const AppointmentBookingPage: React.FC = () => {
                   onChange={(e) => setMode(e.target.value)}
                   sx={{ height: '56px' }}
                 >
-                  <MenuItem value="">Cualquiera</MenuItem>
+                  <MenuItem value="ALL">Todas</MenuItem>
                   <MenuItem value="IN_PERSON">Presencial</MenuItem>
                   <MenuItem value="VIRTUAL">Virtual</MenuItem>
                 </Select>
