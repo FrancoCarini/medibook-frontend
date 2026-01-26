@@ -161,6 +161,50 @@ El frontend se conecta con la API de NestJS siguiendo estos endpoints:
 - [ ] Gestión de especialidades por médico
 - [ ] Sistema de notificaciones por email/SMS
 
+## 🌐 Sistema de Traducciones
+
+El sistema maneja la internacionalización de mensajes en `src/utils/messages.ts`:
+
+### Estructura
+
+```ts
+// Mensajes del frontend (UI)
+export const MESSAGES = {
+  WELCOME: '¡Bienvenido a Medibook!',
+  LOGIN_ERROR: 'Error al iniciar sesión',
+  // ...
+};
+
+// Mapeo de mensajes del backend (inglés → español)
+const backendMessages: Record<string, string> = {
+  'Invalid credentials': 'Credenciales inválidas',
+  // ...
+};
+```
+
+### Funciones
+
+- **`translate(message)`**: Traduce un mensaje del backend a español. Si no encuentra traducción, devuelve el original.
+- **`getErrorMessage(error, fallback)`**: Extrae y traduce el mensaje de error de una respuesta de API.
+
+### Uso
+
+```ts
+// En componentes - mensajes de UI
+import { MESSAGES } from '../utils/messages';
+toast.success(MESSAGES.APPOINTMENT_BOOKED);
+
+// Para errores de API
+import { getErrorMessage } from '../utils/messages';
+catch (error) {
+  toast.error(getErrorMessage(error));
+}
+```
+
+### Integración automática
+
+El interceptor de Axios en `api.ts` traduce automáticamente los mensajes de error del backend antes de propagarlos.
+
 ## 🧪 Testing
 
 ```bash

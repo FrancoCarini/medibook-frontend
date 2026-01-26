@@ -30,6 +30,7 @@ import { es } from 'date-fns/locale';
 import { availabilitiesService } from '../../services/availabilities';
 import { useUI } from '../../contexts/UIContext';
 import type { Availability, AppointmentMode, AvailabilityStatus } from '../../types';
+import { MESSAGES } from '../../utils/messages';
 
 interface DayAvailabilitiesModalProps {
   open: boolean;
@@ -69,7 +70,7 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
       setError(null);
       setConfirmDeleteId(null);
       await availabilitiesService.delete(confirmDeleteId);
-      showSuccess('Disponibilidad eliminada correctamente');
+      showSuccess(MESSAGES.AVAILABILITY_DELETED);
       onAvailabilityDeleted(confirmDeleteId);
     } catch (err: any) {
       setError(err.message || 'Error al eliminar la disponibilidad');

@@ -23,6 +23,7 @@ import { availabilitiesService } from '../../services/availabilities';
 import type { CreateAvailabilityDto } from '../../services/availabilities';
 import { AppointmentMode } from '../../types';
 import type { Specialty } from '../../types';
+import { getErrorMessage } from '../../utils/messages';
 
 interface IndividualAvailabilityFormProps {
   selectedDate: Date | null;
@@ -100,7 +101,7 @@ export const IndividualAvailabilityForm: React.FC<IndividualAvailabilityFormProp
       
       onAvailabilityCreated();
     } catch (error: any) {
-      setError(error.message || 'Error al crear la disponibilidad');
+      setError(getErrorMessage(error, 'Error al crear la disponibilidad'));
     } finally {
       setLoading(false);
     }

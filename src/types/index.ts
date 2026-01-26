@@ -125,6 +125,18 @@ export interface CreateUserRequest {
   };
 }
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: User;
+}
+
 export interface ApiResponse<T> {
   data: T;
   message?: string;

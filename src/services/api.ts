@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { translate } from '../utils/messages';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -28,7 +29,8 @@ class ApiService {
       async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const token = localStorage.getItem('accessToken');
+        if (error.response?.status === 401 && !originalRequest._retry && token) {
           originalRequest._retry = true;
 
           try {
@@ -46,6 +48,11 @@ class ApiService {
             localStorage.removeItem('accessToken');
             window.location.href = '/login';
           }
+        }
+
+        // Traducir mensaje de error del backend
+        if (error.response?.data?.message) {
+          error.response.data.message = translate(error.response.data.message);
         }
 
         return Promise.reject(error);

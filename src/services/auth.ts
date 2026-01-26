@@ -1,6 +1,6 @@
 import { apiService } from './api';
 import { mockAuthService } from './mockAuth';
-import type { LoginRequest, LoginResponse, CreateUserRequest, User, ApiResponse } from '../types';
+import type { LoginRequest, LoginResponse, CreateUserRequest, User, RegisterRequest, RegisterResponse } from '../types';
 
 // Cambiar a false para usar el backend real
 const USE_MOCK = false;
@@ -35,6 +35,11 @@ export const authService = {
 
   async createUser(userData: CreateUserRequest): Promise<User> {
     const response = await apiService.post<User>('/users', userData);
+    return response;
+  },
+
+  async register(data: RegisterRequest): Promise<RegisterResponse> {
+    const response = await apiService.post<RegisterResponse>('/auth/register', data);
     return response;
   },
 

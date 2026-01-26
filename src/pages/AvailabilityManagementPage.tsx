@@ -29,6 +29,7 @@ import { DayAvailabilitiesModal } from '../components/availability/DayAvailabili
 import { availabilitiesService } from '../services/availabilities';
 import { configAvailabilitiesService } from '../services/configAvailabilities';
 import type { Availability, ConfigAvailability, Specialty } from '../types';
+import { MESSAGES } from '../utils/messages';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -89,7 +90,7 @@ export const AvailabilityManagementPage: React.FC = () => {
       setAvailabilities(availData);
     } catch (error) {
       console.error('Error fetching availabilities:', error);
-      showError('Error al cargar las disponibilidades del mes');
+      showError(MESSAGES.AVAILABILITIES_LOAD_ERROR);
     }
   }, [user?.doctorId, showError]);
 
@@ -103,7 +104,7 @@ export const AvailabilityManagementPage: React.FC = () => {
         setSpecialties(user?.specialties || []);
       } catch (error) {
         console.error('Error fetching config data:', error);
-        showError('Error al cargar las configuraciones');
+        showError(MESSAGES.CONFIG_AVAILABILITIES_LOAD_ERROR);
       } finally {
         setLoading(false);
       }

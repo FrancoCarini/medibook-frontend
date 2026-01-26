@@ -36,6 +36,7 @@ import { specialtiesService, availabilitiesService, appointmentsService } from '
 import type { Specialty, Availability } from '../types';
 import { AppointmentConfirmationModal } from '../components/AppointmentConfirmationModal';
 import { AppointmentSkeletonGroup } from '../components/AppointmentCardSkeleton';
+import { MESSAGES } from '../utils/messages';
 
 export const AppointmentBookingPage: React.FC = () => {
   const { user } = useAuth();
@@ -188,13 +189,13 @@ export const AppointmentBookingPage: React.FC = () => {
     setBookingLoading(true);
     try {
       await appointmentsService.create({ availabilityId: selectedAvailability.id });
-      showSuccess('¡Cita reservada exitosamente! Recibirás un correo de confirmación.', 5000);
+      showSuccess(MESSAGES.APPOINTMENT_BOOKED, 5000);
       closeConfirmationModal();
       // Actualizar resultados de búsqueda
       handleSearch();
     } catch (error) {
       console.error('Error al reservar cita:', error);
-      showError('Error al reservar la cita. Por favor, intenta nuevamente.');
+      showError(MESSAGES.APPOINTMENT_BOOKING_ERROR);
     } finally {
       setBookingLoading(false);
     }

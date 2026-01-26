@@ -13,14 +13,18 @@ import {
 import { LocalHospital } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
+import { authService } from '../services/auth';
 import { MESSAGES } from '../utils/messages';
 
-export const LoginPage: React.FC = () => {
+export const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { login, isAuthenticated } = useAuth();
+
+  const { isAuthenticated } = useAuth();
   const { showError, showSuccess } = useUI();
   const navigate = useNavigate();
 
@@ -30,14 +34,30 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      showError(MESSAGES.PASSWORDS_DONT_MATCH);
+      return;
+    }
+
+    if (password.length < 6) {
+      showError(MESSAGES.PASSWORD_MIN_LENGTH);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      showSuccess(MESSAGES.WELCOME);
-      navigate('/dashboard');
+      await authService.register({
+        email,
+        password,
+        firstName,
+        lastName,
+      });
+      showSuccess(MESSAGES.REGISTER_SUCCESS);
+      navigate('/login');
     } catch (err: any) {
-      showError(err.response?.data?.message || MESSAGES.LOGIN_ERROR);
+      showError(err.response?.data?.message || MESSAGES.REGISTER_ERROR);
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +80,7 @@ export const LoginPage: React.FC = () => {
               Medibook
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
-              Inicia sesión en tu cuenta
+              Crea tu cuenta de paciente
             </Typography>
           </Box>
 
@@ -69,16 +89,43 @@ export const LoginPage: React.FC = () => {
               margin="normal"
               required
               fullWidth
+              id="firstName"
+              label="Nombre"
+              name="firstName"
+              autoComplete="given-name"
+              autoFocus
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              disabled={isLoading}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="lastName"
+              label="Apellido"
+              name="lastName"
+              autoComplete="family-name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={isLoading}
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               id="email"
               label="Email"
               name="email"
               autoComplete="email"
-              autoFocus
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
             />
-            
+
             <TextField
               margin="normal"
               required
@@ -87,9 +134,24 @@ export const LoginPage: React.FC = () => {
               label="Contraseña"
               type="password"
               id="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              helperText="Mínimo 6 caracteres"
+            />
+
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirmar contraseña"
+              type="password"
+              id="confirmPassword"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
             />
 
@@ -101,14 +163,14 @@ export const LoginPage: React.FC = () => {
               disabled={isLoading}
               startIcon={isLoading && <CircularProgress size={20} />}
             >
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {isLoading ? 'Registrando...' : 'Registrarse'}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                ¿No tenés cuenta?{' '}
-                <Link component={RouterLink} to="/register" underline="hover">
-                  Registrate
+                ¿Ya tenés cuenta?{' '}
+                <Link component={RouterLink} to="/login" underline="hover">
+                  Iniciar sesión
                 </Link>
               </Typography>
             </Box>

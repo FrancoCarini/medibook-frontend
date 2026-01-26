@@ -43,6 +43,7 @@ import { useNavigate } from 'react-router-dom';
 import { appointmentsService } from '../services/appointments';
 import { AppointmentStatus } from '../types';
 import type { Appointment } from '../types';
+import { MESSAGES } from '../utils/messages';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -174,10 +175,10 @@ export const DoctorAppointmentsPage: React.FC = () => {
       );
 
       setCancelDialog({ open: false, appointmentId: null });
-      showSuccess('Cita cancelada exitosamente');
+      showSuccess(MESSAGES.APPOINTMENT_CANCELLED);
     } catch (error) {
       console.error('Error al cancelar cita:', error);
-      showError('Error al cancelar la cita');
+      showError(MESSAGES.APPOINTMENT_CANCEL_ERROR);
     }
   };
 
@@ -194,10 +195,10 @@ export const DoctorAppointmentsPage: React.FC = () => {
       );
 
       setCompleteDialog({ open: false, appointmentId: null });
-      showSuccess('Cita marcada como completada');
+      showSuccess(MESSAGES.APPOINTMENT_COMPLETED);
     } catch (error) {
       console.error('Error al completar cita:', error);
-      showError('Error al completar la cita');
+      showError(MESSAGES.APPOINTMENT_COMPLETE_ERROR);
     }
   };
 

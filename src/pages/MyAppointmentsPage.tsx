@@ -40,6 +40,7 @@ import { useUI } from '../contexts/UIContext';
 import { useNavigate } from 'react-router-dom';
 import { appointmentsService } from '../services/appointments';
 import type { Appointment } from '../types';
+import { MESSAGES } from '../utils/messages';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -130,7 +131,7 @@ export const MyAppointmentsPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error al cargar citas:', error);
-      showError('Error al cargar las citas');
+      showError(MESSAGES.APPOINTMENTS_LOAD_ERROR);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -168,10 +169,10 @@ export const MyAppointmentsPage: React.FC = () => {
       );
 
       setCancelDialog({ open: false, appointmentId: null });
-      showSuccess('Cita cancelada exitosamente');
+      showSuccess(MESSAGES.APPOINTMENT_CANCELLED);
     } catch (error) {
       console.error('Error al cancelar cita:', error);
-      showError('Error al cancelar la cita');
+      showError(MESSAGES.APPOINTMENT_CANCEL_ERROR);
     }
   };
 

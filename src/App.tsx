@@ -6,6 +6,7 @@ import { UIProvider } from './contexts/UIContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { UserRole } from './types';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AppointmentBookingPage } from './pages/AppointmentBookingPage';
 import { MyAppointmentsPage } from './pages/MyAppointmentsPage';
@@ -32,6 +33,7 @@ function App() {
           <Router>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route 
               path="/dashboard" 
               element={
