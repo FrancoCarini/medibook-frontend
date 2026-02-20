@@ -22,12 +22,24 @@ export enum UserRole {
   PATIENT = 'PATIENT'
 }
 
+export interface Client {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ClientDetail extends Client {
+  doctors: Doctor[];
+  specialties: Specialty[];
+}
+
 export interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
   role: UserRole;
+  clientId?: string;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -38,6 +50,7 @@ export interface User {
 export interface Doctor {
   id: string;
   userId: string;
+  clientId?: string;
   licenseNumber: string;
   title: string;
   user?: User;
@@ -55,6 +68,7 @@ export interface Availability {
   id: string;
   doctorId: string;
   specialtyId: string;
+  clientId?: string;
   configId?: string;
   mode: AppointmentMode;
   startTime: string;
@@ -72,6 +86,7 @@ export interface ConfigAvailability {
   id: string;
   doctorId: string;
   specialtyId: string;
+  clientId?: string;
   mode: AppointmentMode;
   startDate: string;
   endDate?: string;
@@ -91,6 +106,7 @@ export interface Appointment {
   availabilityId?: string;
   doctorId: string;
   patientId: string;
+  clientId?: string;
   mode: AppointmentMode;
   startTime: string;
   endTime: string;
@@ -122,6 +138,7 @@ export interface CreateUserRequest {
   doctorData?: {
     licenseNumber: string;
     title: string;
+    clientId: string;
   };
 }
 
@@ -153,6 +170,7 @@ export interface PaginatedResponse<T> {
 export interface SearchAvailabilityRequest {
   doctorId?: string;
   specialtyId?: string;
+  clientId?: string;
   startDate?: string;
   endDate?: string;
   mode?: AppointmentMode;

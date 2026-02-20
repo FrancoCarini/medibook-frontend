@@ -82,6 +82,11 @@ const backendMessages: Record<string, string> = {
   'Invalid time range': 'Rango de horarios inválido',
   'Past dates are not allowed': 'No se permiten fechas pasadas',
 
+  // Client
+  'Client not found': 'Cliente no encontrado',
+  'A client with this slug already exists': 'Ya existe un cliente con este slug',
+  'Doctor does not belong to this client': 'El médico no pertenece a este cliente',
+
   // General
   'Internal server error': 'Error interno del servidor',
   'Resource not found': 'Recurso no encontrado',

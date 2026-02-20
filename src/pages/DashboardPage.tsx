@@ -23,12 +23,16 @@ import {
   ExitToApp
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { UserRole } from '../types';
 
 export const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  if (user?.role === UserRole.PATIENT) {
+    return <Navigate to="/clients" replace />;
+  }
 
   const handleLogout = async () => {
     try {

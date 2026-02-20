@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate, useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -8,28 +8,74 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Link
+  Link,
+  Alert
 } from '@mui/material';
 import { LocalHospital } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
-import { UserRole } from '../types';
+import { clientsService } from '../services/clients';
 import { MESSAGES } from '../utils/messages';
+import type { ClientDetail } from '../types';
 
-export const LoginPage: React.FC = () => {
+export const ClientLoginPage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { login, isAuthenticated, user } = useAuth();
+  const [client, setClient] = useState<ClientDetail | null>(null);
+  const [loadingClient, setLoadingClient] = useState(true);
+  const [clientError, setClientError] = useState(false);
+
+  const { login, isAuthenticated } = useAuth();
   const { showError, showSuccess } = useUI();
   const navigate = useNavigate();
 
-  if (isAuthenticated) {
-    if (user?.role === UserRole.PATIENT) {
-      return <Navigate to="/clients" replace />;
-    }
-    return <Navigate to="/dashboard" replace />;
+  useEffect(() => {
+    const loadClient = async () => {
+      if (!slug) return;
+      try {
+        const data = await clientsService.getBySlug(slug);
+        setClient(data);
+      } catch {
+        setClientError(true);
+      } finally {
+        setLoadingClient(false);
+      }
+    };
+    loadClient();
+  }, [slug]);
+
+  if (isAuthenticated && slug) {
+    return <Navigate to={`/${slug}/book-appointment`} replace />;
+  }
+
+  if (loadingClient) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
+
+  if (clientError || !client) {
+    return (
+      <Container component="main" maxWidth="xs">
+        <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Alert severity="error" sx={{ width: '100%' }}>
+            Cliente no encontrado. Verificá la URL e intentá nuevamente.
+          </Alert>
+          <Button
+            component={RouterLink}
+            to="/login"
+            variant="text"
+            sx={{ mt: 2 }}
+          >
+            Ir al login general
+          </Button>
+        </Box>
+      </Container>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,14 +85,7 @@ export const LoginPage: React.FC = () => {
     try {
       await login(email, password);
       showSuccess(MESSAGES.WELCOME);
-      // login updates user in context; read from localStorage for immediate redirect
-      const savedUser = localStorage.getItem('user');
-      const loggedUser = savedUser ? JSON.parse(savedUser) : null;
-      if (loggedUser?.role === UserRole.PATIENT) {
-        navigate('/clients');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate(`/${slug}/book-appointment`);
     } catch (err: any) {
       showError(err.response?.data?.message || MESSAGES.LOGIN_ERROR);
     } finally {
@@ -68,10 +107,10 @@ export const LoginPage: React.FC = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <LocalHospital sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography component="h1" variant="h4" gutterBottom>
-              Medibook
+              {client.name}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
-              Inicia sesión en tu cuenta
+              Iniciá sesión para reservar tu turno
             </Typography>
           </Box>
 
@@ -89,7 +128,7 @@ export const LoginPage: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
             />
-            
+
             <TextField
               margin="normal"
               required
@@ -118,7 +157,7 @@ export const LoginPage: React.FC = () => {
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
                 ¿No tenés cuenta?{' '}
-                <Link component={RouterLink} to="/register" underline="hover">
+                <Link component={RouterLink} to={`/register?client=${slug}`} underline="hover">
                   Registrate
                 </Link>
               </Typography>

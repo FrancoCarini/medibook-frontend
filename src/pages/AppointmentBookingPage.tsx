@@ -31,9 +31,9 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
-import { useNavigate } from 'react-router-dom';
-import { specialtiesService, availabilitiesService, appointmentsService } from '../services';
-import type { Specialty, Availability } from '../types';
+import { useNavigate, useParams } from 'react-router-dom';
+import { specialtiesService, availabilitiesService, appointmentsService, clientsService } from '../services';
+import type { Specialty, Availability, ClientDetail } from '../types';
 import { AppointmentConfirmationModal } from '../components/AppointmentConfirmationModal';
 import { AppointmentSkeletonGroup } from '../components/AppointmentCardSkeleton';
 import { MESSAGES } from '../utils/messages';
@@ -42,10 +42,15 @@ export const AppointmentBookingPage: React.FC = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useUI();
   const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
+  const [client, setClient] = useState<ClientDetail | null>(null);
 
   useEffect(() => {
     loadSpecialties();
-  }, []);
+    if (slug) {
+      clientsService.getBySlug(slug).then(setClient).catch(console.error);
+    }
+  }, [slug]);
 
   const loadSpecialties = async () => {
     try {
@@ -96,7 +101,8 @@ export const AppointmentBookingPage: React.FC = () => {
         page: pageToLoad,
         limit: 20
       };
-      
+
+      if (client?.id) searchParams.clientId = client.id;
       if (mode && mode !== 'ALL') searchParams.mode = mode;
       if (startDate) searchParams.startDate = startDate;
       if (endDate) searchParams.endDate = endDate;
@@ -205,16 +211,16 @@ export const AppointmentBookingPage: React.FC = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton 
-            color="inherit" 
-            onClick={() => navigate('/dashboard')}
+          <IconButton
+            color="inherit"
+            onClick={() => navigate(slug ? `/${slug}/my-appointments` : '/clients')}
             sx={{ mr: 2 }}
           >
             <ArrowBack />
           </IconButton>
           <LocalHospital sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Reservar Cita
+            {client ? `${client.name} - Reservar Cita` : 'Reservar Cita'}
           </Typography>
         </Toolbar>
       </AppBar>

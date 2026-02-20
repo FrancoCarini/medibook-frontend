@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -27,6 +27,8 @@ export const RegisterPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { showError, showSuccess } = useUI();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const clientSlug = searchParams.get('client');
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -55,7 +57,7 @@ export const RegisterPage: React.FC = () => {
         lastName,
       });
       showSuccess(MESSAGES.REGISTER_SUCCESS);
-      navigate('/login');
+      navigate(clientSlug ? `/${clientSlug}` : '/login');
     } catch (err: any) {
       showError(err.response?.data?.message || MESSAGES.REGISTER_ERROR);
     } finally {

@@ -37,7 +37,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { appointmentsService } from '../services/appointments';
 import type { Appointment } from '../types';
 import { MESSAGES } from '../utils/messages';
@@ -66,6 +66,7 @@ export const MyAppointmentsPage: React.FC = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useUI();
   const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
 
   const [tabValue, setTabValue] = useState(0);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -294,9 +295,9 @@ export const MyAppointmentsPage: React.FC = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton 
-            color="inherit" 
-            onClick={() => navigate('/dashboard')}
+          <IconButton
+            color="inherit"
+            onClick={() => navigate(slug ? `/${slug}/book-appointment` : '/clients')}
             sx={{ mr: 2 }}
           >
             <ArrowBack />
@@ -403,7 +404,7 @@ export const MyAppointmentsPage: React.FC = () => {
               No tienes citas próximas.
               <Button
                 variant="text"
-                onClick={() => navigate('/book-appointment')}
+                onClick={() => navigate(slug ? `/${slug}/book-appointment` : '/book-appointment')}
                 sx={{ ml: 1 }}
               >
                 Reservar una cita

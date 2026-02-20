@@ -12,6 +12,8 @@ import { AppointmentBookingPage } from './pages/AppointmentBookingPage';
 import { MyAppointmentsPage } from './pages/MyAppointmentsPage';
 import { DoctorAppointmentsPage } from './pages/DoctorAppointmentsPage';
 import { AvailabilityManagementPage } from './pages/AvailabilityManagementPage';
+import { ClientLoginPage } from './pages/ClientLoginPage';
+import { ClientsIndexPage } from './pages/ClientsIndexPage';
 
 const theme = createTheme({
   palette: {
@@ -32,58 +34,69 @@ function App() {
         <UIProvider>
           <Router>
           <Routes>
+            {/* Static public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route 
-              path="/dashboard" 
+
+            {/* Static protected routes */}
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <DashboardPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/book-appointment" 
+            <Route
+              path="/clients"
+              element={
+                <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
+                  <ClientsIndexPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/book-appointment"
               element={
                 <ProtectedRoute>
                   <AppointmentBookingPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/my-appointments" 
+            <Route
+              path="/my-appointments"
               element={
                 <ProtectedRoute>
                   <MyAppointmentsPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/doctor-appointments" 
+            <Route
+              path="/doctor-appointments"
               element={
                 <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
                   <DoctorAppointmentsPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/availability-management" 
+            <Route
+              path="/availability-management"
               element={
                 <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
                   <AvailabilityManagementPage />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route 
-              path="/unauthorized" 
+            <Route
+              path="/unauthorized"
               element={
                 <Container>
-                  <Box 
-                    display="flex" 
-                    flexDirection="column" 
-                    alignItems="center" 
-                    justifyContent="center" 
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    justifyContent="center"
                     minHeight="100vh"
                   >
                     <Typography variant="h4" gutterBottom>
@@ -94,17 +107,38 @@ function App() {
                     </Typography>
                   </Box>
                 </Container>
-              } 
+              }
             />
-            <Route 
-              path="*" 
+
+            {/* Client slug routes — must come after all static routes */}
+            <Route
+              path="/:slug/book-appointment"
+              element={
+                <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
+                  <AppointmentBookingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/:slug/my-appointments"
+              element={
+                <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
+                  <MyAppointmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/:slug" element={<ClientLoginPage />} />
+
+            {/* 404 catch-all */}
+            <Route
+              path="*"
               element={
                 <Container>
-                  <Box 
-                    display="flex" 
-                    flexDirection="column" 
-                    alignItems="center" 
-                    justifyContent="center" 
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    justifyContent="center"
                     minHeight="100vh"
                   >
                     <Typography variant="h4" gutterBottom>
@@ -115,7 +149,7 @@ function App() {
                     </Typography>
                   </Box>
                 </Container>
-              } 
+              }
             />
           </Routes>
           </Router>

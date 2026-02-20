@@ -16,6 +16,7 @@ export const usersService = {
     doctorData?: {
       licenseNumber: string;
       title: string;
+      clientId: string;
     };
   }): Promise<User> {
     const response = await apiService.post<User>('/users', userData);
