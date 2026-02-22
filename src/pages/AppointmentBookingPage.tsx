@@ -213,7 +213,7 @@ export const AppointmentBookingPage: React.FC = () => {
         <Toolbar>
           <IconButton
             color="inherit"
-            onClick={() => navigate(slug ? `/${slug}/my-appointments` : '/clients')}
+            onClick={() => navigate(slug ? `/${slug}` : '/clients')}
             sx={{ mr: 2 }}
           >
             <ArrowBack />

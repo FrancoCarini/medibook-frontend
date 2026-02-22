@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -17,6 +17,7 @@ import { useUI } from '../contexts/UIContext';
 import { clientsService } from '../services/clients';
 import { MESSAGES } from '../utils/messages';
 import type { ClientDetail } from '../types';
+import { ClientHomePage } from './ClientHomePage';
 
 export const ClientLoginPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -47,7 +48,7 @@ export const ClientLoginPage: React.FC = () => {
   }, [slug]);
 
   if (isAuthenticated && slug) {
-    return <Navigate to={`/${slug}/book-appointment`} replace />;
+    return <ClientHomePage />;
   }
 
   if (loadingClient) {
@@ -85,7 +86,7 @@ export const ClientLoginPage: React.FC = () => {
     try {
       await login(email, password);
       showSuccess(MESSAGES.WELCOME);
-      navigate(`/${slug}/book-appointment`);
+      navigate(`/${slug}`);
     } catch (err: any) {
       showError(err.response?.data?.message || MESSAGES.LOGIN_ERROR);
     } finally {
