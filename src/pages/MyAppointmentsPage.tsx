@@ -39,6 +39,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { appointmentsService } from '../services/appointments';
+import { clientsService } from '../services/clients';
 import type { Appointment } from '../types';
 import { MESSAGES } from '../utils/messages';
 
@@ -71,6 +72,7 @@ export const MyAppointmentsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
+  const [clientId, setClientId] = useState<string | undefined>(undefined);
   const [cancelDialog, setCancelDialog] = useState<{ open: boolean; appointmentId: string | null }>({
     open: false,
     appointmentId: null
@@ -91,8 +93,23 @@ export const MyAppointmentsPage: React.FC = () => {
   const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
-    loadAppointments();
+    if (slug) {
+      clientsService.getBySlug(slug).then((client) => {
+        setClientId(client.id);
+      }).catch((error) => {
+        console.error('Error loading client:', error);
+        showError('Error al cargar la clínica');
+      });
+    } else {
+      loadAppointments();
+    }
   }, []);
+
+  useEffect(() => {
+    if (clientId) {
+      loadAppointments();
+    }
+  }, [clientId]);
 
   const loadAppointments = async (page: number = 1, append: boolean = false) => {
     if (append) {
@@ -107,6 +124,9 @@ export const MyAppointmentsPage: React.FC = () => {
         page
       };
 
+      if (clientId) {
+        searchParams.clientId = clientId;
+      }
       if (startDate) {
         searchParams.startDate = startDate;
       }
@@ -297,7 +317,7 @@ export const MyAppointmentsPage: React.FC = () => {
         <Toolbar>
           <IconButton
             color="inherit"
-            onClick={() => navigate(slug ? `/${slug}/book-appointment` : '/clients')}
+            onClick={() => navigate(slug ? `/${slug}` : '/clients')}
             sx={{ mr: 2 }}
           >
             <ArrowBack />

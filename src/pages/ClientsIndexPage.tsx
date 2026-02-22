@@ -8,6 +8,7 @@ import {
   CardContent,
   CardActionArea,
   Box,
+  Button,
   IconButton,
   Stack,
   Chip,
@@ -18,7 +19,8 @@ import {
 import {
   LocalHospital,
   ExitToApp,
-  Business
+  Business,
+  CalendarMonth
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
@@ -69,7 +71,7 @@ export const ClientsIndexPage: React.FC = () => {
   const ClientCard = ({ client }: { client: Client }) => (
     <Grid item xs={12} sm={6} md={4}>
       <Card>
-        <CardActionArea onClick={() => navigate(`/${client.slug}/book-appointment`)}>
+        <CardActionArea onClick={() => navigate(`/${client.slug}`)}>
           <CardContent>
             <Box display="flex" alignItems="center" gap={2}>
               <Business sx={{ fontSize: 40, color: 'primary.main' }} />
@@ -102,13 +104,22 @@ export const ClientsIndexPage: React.FC = () => {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box mb={4}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Bienvenido, {user?.firstName}
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Elegí una clínica para reservar tu turno
-          </Typography>
+        <Box mb={4} display="flex" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Bienvenido, {user?.firstName}
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Elegí una clínica para reservar tu turno
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            startIcon={<CalendarMonth />}
+            onClick={() => navigate('/my-appointments')}
+          >
+            Mis Turnos
+          </Button>
         </Box>
 
         {loading ? (

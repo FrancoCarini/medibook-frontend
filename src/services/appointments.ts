@@ -7,6 +7,7 @@ export interface CreateAppointmentDto {
 }
 
 export interface SearchAppointmentsDto {
+  clientId?: string;
   doctorId?: string;
   patientId?: string;
   mode?: AppointmentMode;
