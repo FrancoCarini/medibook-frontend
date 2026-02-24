@@ -32,11 +32,18 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { specialtiesService, availabilitiesService, appointmentsService, clientsService } from '../services';
-import type { Specialty, Availability, ClientDetail } from '../types';
+import { availabilitiesService, appointmentsService, clientsService } from '../services';
+import type { Availability, ClientDetail } from '../types';
 import { AppointmentConfirmationModal } from '../components/AppointmentConfirmationModal';
 import { AppointmentSkeletonGroup } from '../components/AppointmentCardSkeleton';
 import { MESSAGES } from '../utils/messages';
+
+interface ProfessionalOption {
+  value: string;
+  doctorId: string;
+  specialtyId: string;
+  label: string;
+}
 
 export const AppointmentBookingPage: React.FC = () => {
   const { user } = useAuth();
@@ -44,32 +51,39 @@ export const AppointmentBookingPage: React.FC = () => {
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
-
-  useEffect(() => {
-    loadSpecialties();
-    if (slug) {
-      clientsService.getBySlug(slug).then(setClient).catch(console.error);
-    }
-  }, [slug]);
-
-  const loadSpecialties = async () => {
-    try {
-      const data = await specialtiesService.getSpecialties();
-      setSpecialties(data);
-    } catch (error) {
-      console.error('Error loading specialties:', error);
-    } finally {
-      setLoadingSpecialties(false);
-    }
-  };
-  
-  const [specialty, setSpecialty] = useState('');
+  const [selectedProfessional, setSelectedProfessional] = useState('');
+  const [professionalOptions, setProfessionalOptions] = useState<ProfessionalOption[]>([]);
   const [mode, setMode] = useState('ALL');
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [searchResults, setSearchResults] = useState<Availability[]>([]);
   const [groupedResults, setGroupedResults] = useState<{[key: string]: Availability[]}>({});
   const [loading, setLoading] = useState(false);
-  const [loadingSpecialties, setLoadingSpecialties] = useState(true);
+
+  useEffect(() => {
+    if (slug) {
+      clientsService.getBySlug(slug).then((clientData) => {
+        setClient(clientData);
+        const options: ProfessionalOption[] = [];
+        for (const doctor of clientData.doctors) {
+          const doctorName = `${doctor.user?.firstName} ${doctor.user?.lastName}`;
+          for (const ds of doctor.specialties as any[]) {
+            const spec = ds.specialty;
+            options.push({
+              value: `${doctor.id}::${spec.id}`,
+              doctorId: doctor.id,
+              specialtyId: spec.id,
+              label: `${doctorName} - ${spec.name}`,
+            });
+          }
+        }
+        options.sort((a, b) => a.label.localeCompare(b.label));
+        setProfessionalOptions(options);
+        if (options.length === 1) {
+          setSelectedProfessional(options[0].value);
+        }
+      }).catch(console.error);
+    }
+  }, [slug]);
+
   const [hasSearched, setHasSearched] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreResults, setHasMoreResults] = useState(false);
@@ -81,12 +95,13 @@ export const AppointmentBookingPage: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const handleSearch = async (loadMore = false) => {
-    if (!specialty) {
+    if (!selectedProfessional) {
       return;
     }
 
+    const [doctorId, specialtyId] = selectedProfessional.split('::');
     const pageToLoad = loadMore ? currentPage + 1 : 1;
-    
+
     if (loadMore) {
       setLoadingMore(true);
     } else {
@@ -94,10 +109,11 @@ export const AppointmentBookingPage: React.FC = () => {
       setHasSearched(true);
       setCurrentPage(1);
     }
-    
+
     try {
       const searchParams: any = {
-        specialtyId: specialty,
+        doctorId,
+        specialtyId,
         page: pageToLoad,
         limit: 20
       };
@@ -233,17 +249,17 @@ export const AppointmentBookingPage: React.FC = () => {
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', '@media (max-width: 900px)': { flexDirection: 'column' } }}>
               <FormControl sx={{ flex: '1 1 280px', minWidth: '250px' }}>
-                <InputLabel>Especialidad *</InputLabel>
+                <InputLabel>Profesional *</InputLabel>
                 <Select
-                  value={specialty}
-                  label="Especialidad *"
-                  onChange={(e) => setSpecialty(e.target.value)}
-                  disabled={loadingSpecialties}
+                  value={selectedProfessional}
+                  label="Profesional *"
+                  onChange={(e) => setSelectedProfessional(e.target.value)}
+                  disabled={professionalOptions.length === 0}
                   sx={{ height: '56px' }}
                 >
-                  {specialties.map((spec) => (
-                    <MenuItem key={spec.id} value={spec.id}>
-                      {spec.name}
+                  {professionalOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
                     </MenuItem>
                   ))}
                 </Select>
@@ -285,7 +301,7 @@ export const AppointmentBookingPage: React.FC = () => {
                 variant="contained"
                 startIcon={<Search />}
                 onClick={() => handleSearch()}
-                disabled={!specialty || loading}
+                disabled={!selectedProfessional || loading}
                 sx={{ 
                   height: '56px',
                   flex: '0 1 200px',
