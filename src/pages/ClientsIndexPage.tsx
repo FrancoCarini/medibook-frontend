@@ -70,12 +70,15 @@ export const ClientsIndexPage: React.FC = () => {
 
   const ClientCard = ({ client }: { client: Client }) => (
     <Grid item xs={12} sm={6} md={4}>
-      <Card>
-        <CardActionArea onClick={() => navigate(`/${client.slug}`)}>
-          <CardContent>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Business sx={{ fontSize: 40, color: 'primary.main' }} />
-              <Typography variant="h6">{client.name}</Typography>
+      <Card elevation={2} sx={{ height: '100%' }}>
+        <CardActionArea onClick={() => navigate(`/${client.slug}`)} sx={{ height: '100%' }}>
+          <CardContent sx={{ p: 4 }}>
+            <Box display="flex" flexDirection="column" alignItems="center" textAlign="center" gap={2}>
+              <Business sx={{ fontSize: 56, color: 'primary.main' }} />
+              <Typography variant="h5" fontWeight={600}>{client.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                /{client.slug}
+              </Typography>
             </Box>
           </CardContent>
         </CardActionArea>
