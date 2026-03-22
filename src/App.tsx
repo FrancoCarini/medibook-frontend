@@ -14,6 +14,8 @@ import { DoctorAppointmentsPage } from './pages/DoctorAppointmentsPage';
 import { AvailabilityManagementPage } from './pages/AvailabilityManagementPage';
 import { ClientLoginPage } from './pages/ClientLoginPage';
 import { ClientsIndexPage } from './pages/ClientsIndexPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 
 const theme = createTheme({
   palette: {
@@ -37,6 +39,8 @@ function App() {
             {/* Static public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Static protected routes */}
             <Route

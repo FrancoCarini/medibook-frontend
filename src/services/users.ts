@@ -22,4 +22,9 @@ export const usersService = {
     const response = await apiService.post<User>('/users', userData);
     return response;
   },
+
+  async searchPatients(search: string): Promise<User[]> {
+    const response = await apiService.get<User[]>(`/users/patients?search=${encodeURIComponent(search)}`);
+    return response;
+  },
 };

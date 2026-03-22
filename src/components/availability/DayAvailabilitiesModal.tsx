@@ -23,12 +23,14 @@ import {
   LocationOn,
   VideoCall,
   AccessTime,
-  Warning
+  Warning,
+  PersonAdd
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { availabilitiesService } from '../../services/availabilities';
 import { useUI } from '../../contexts/UIContext';
+import { AssignAppointmentModal } from './AssignAppointmentModal';
 import type { Availability, AppointmentMode, AvailabilityStatus } from '../../types';
 import { MESSAGES } from '../../utils/messages';
 
@@ -39,6 +41,7 @@ interface DayAvailabilitiesModalProps {
   onClose: () => void;
   onAvailabilityDeleted: (deletedId: string) => void;
   onAddAvailability: (date: Date) => void;
+  onAppointmentAssigned?: () => void;
 }
 
 export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
@@ -47,12 +50,14 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
   availabilities,
   onClose,
   onAvailabilityDeleted,
-  onAddAvailability
+  onAddAvailability,
+  onAppointmentAssigned
 }) => {
   const { showSuccess } = useUI();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [assignAvailability, setAssignAvailability] = useState<Availability | null>(null);
 
   const handleDeleteClick = (availabilityId: string) => {
     setConfirmDeleteId(availabilityId);
@@ -77,6 +82,11 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
     } finally {
       setLoading(null);
     }
+  };
+
+  const handleAssigned = () => {
+    setAssignAvailability(null);
+    onAppointmentAssigned?.();
   };
 
   const availabilityToDelete = confirmDeleteId
@@ -198,15 +208,27 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
                   {loading === availability.id ? (
                     <CircularProgress size={24} />
                   ) : (
-                    <IconButton
-                      edge="end"
-                      onClick={() => handleDeleteClick(availability.id)}
-                      color="error"
-                      disabled={loading !== null}
-                      title="Eliminar disponibilidad"
-                    >
-                      <Delete />
-                    </IconButton>
+                    <>
+                      {availability.status === 'AVAILABLE' && (
+                        <IconButton
+                          onClick={() => setAssignAvailability(availability)}
+                          color="primary"
+                          disabled={loading !== null}
+                          title="Asignar turno"
+                        >
+                          <PersonAdd />
+                        </IconButton>
+                      )}
+                      <IconButton
+                        edge="end"
+                        onClick={() => handleDeleteClick(availability.id)}
+                        color="error"
+                        disabled={loading !== null}
+                        title="Eliminar disponibilidad"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </>
                   )}
                 </ListItemSecondaryAction>
               </ListItem>
@@ -226,6 +248,14 @@ export const DayAvailabilitiesModal: React.FC<DayAvailabilitiesModalProps> = ({
           Cerrar
         </Button>
       </DialogActions>
+
+      {/* Assign Appointment Modal */}
+      <AssignAppointmentModal
+        open={assignAvailability !== null}
+        availability={assignAvailability}
+        onClose={() => setAssignAvailability(null)}
+        onAssigned={handleAssigned}
+      />
 
       {/* Confirmation Dialog */}
       <Dialog

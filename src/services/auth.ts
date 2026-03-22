@@ -43,6 +43,16 @@ export const authService = {
     return response;
   },
 
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const response = await apiService.post<{ message: string }>('/auth/forgot-password', { email });
+    return response;
+  },
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    const response = await apiService.post<{ message: string }>('/auth/reset-password', { token, password });
+    return response;
+  },
+
   setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);

@@ -145,7 +145,26 @@ export const AvailabilityManagementPage: React.FC = () => {
   const handleAvailabilityCreated = async () => {
     // Refresh availabilities for current month after creation
     if (currentMonthRange) {
-      await fetchAvailabilitiesForMonth(currentMonthRange.startDate, currentMonthRange.endDate);
+      const availData = await availabilitiesService.search({
+        doctorId: user.doctorId,
+        startDate: formatDateForApi(currentMonthRange.startDate),
+        endDate: formatDateForApi(currentMonthRange.endDate),
+        all: true
+      });
+      setAvailabilities(availData);
+
+      // Also refresh the day modal if it's open
+      if (dayModalDate) {
+        const dayStart = new Date(dayModalDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(dayModalDate);
+        dayEnd.setHours(23, 59, 59, 999);
+        const updatedDayAvailabilities = availData.filter((a: Availability) => {
+          const startTime = new Date(a.startTime);
+          return startTime >= dayStart && startTime <= dayEnd;
+        });
+        setDayModalAvailabilities(updatedDayAvailabilities);
+      }
     }
   };
 
@@ -332,6 +351,7 @@ export const AvailabilityManagementPage: React.FC = () => {
           setSelectedDate(date);
           setTabValue(0);
         }}
+        onAppointmentAssigned={handleAvailabilityCreated}
       />
     </Box>
   );

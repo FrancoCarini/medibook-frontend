@@ -116,6 +116,11 @@ export const LoginPage: React.FC = () => {
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Link component={RouterLink} to="/forgot-password" underline="hover">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </Typography>
               <Typography variant="body2" color="text.secondary">
                 ¿No tenés cuenta?{' '}
                 <Link component={RouterLink} to="/register" underline="hover">

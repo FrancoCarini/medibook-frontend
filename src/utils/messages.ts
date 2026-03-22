@@ -9,6 +9,10 @@ export const MESSAGES = {
   REGISTER_ERROR: 'Error al registrarse',
   PASSWORDS_DONT_MATCH: 'Las contraseñas no coinciden',
   PASSWORD_MIN_LENGTH: 'La contraseña debe tener al menos 6 caracteres',
+  FORGOT_PASSWORD_SENT: 'Si existe una cuenta con ese email, se envió un enlace para restablecer tu contraseña.',
+  FORGOT_PASSWORD_ERROR: 'Error al solicitar el restablecimiento de contraseña',
+  PASSWORD_RESET_SUCCESS: 'Contraseña restablecida exitosamente. Ya podés iniciar sesión.',
+  RESET_PASSWORD_ERROR: 'Error al restablecer la contraseña',
 
   // Appointments
   APPOINTMENT_BOOKED: '¡Cita reservada exitosamente! Recibirás un correo de confirmación.',
@@ -23,6 +27,12 @@ export const MESSAGES = {
   AVAILABILITY_DELETED: 'Disponibilidad eliminada correctamente',
   AVAILABILITIES_LOAD_ERROR: 'Error al cargar las disponibilidades del mes',
   CONFIG_AVAILABILITIES_LOAD_ERROR: 'Error al cargar las configuraciones',
+
+  // Assign appointment
+  APPOINTMENT_ASSIGNED: 'Turno asignado exitosamente',
+  PATIENT_SEARCH_ERROR: 'Error al buscar pacientes',
+  PATIENT_SEARCH_MIN_LENGTH: 'Ingresá al menos 3 caracteres para buscar',
+  NO_PATIENTS_FOUND: 'No se encontraron pacientes',
 };
 
 /**
@@ -40,6 +50,9 @@ const backendMessages: Record<string, string> = {
   'Invalid or expired verification token': 'Token de verificación inválido o expirado',
   'Email is already verified': 'El email ya está verificado',
   'Verification email sent successfully': 'Email de verificación enviado exitosamente',
+  'If an account with that email exists, a password reset link has been sent': 'Si existe una cuenta con ese email, se envió un enlace para restablecer tu contraseña',
+  'Invalid or expired reset token': 'Token de restablecimiento inválido o expirado',
+  'Password has been reset successfully': 'Contraseña restablecida exitosamente',
 
   // User
   'User with this email already exists': 'Ya existe un usuario con este email',
@@ -67,6 +80,10 @@ const backendMessages: Record<string, string> = {
   // Config Availability
   'Config availability not found': 'Configuración de disponibilidad no encontrada',
   'Config availability overlaps with existing one': 'La configuración de disponibilidad se superpone con una existente',
+
+  // Patient
+  'Patient not found': 'Paciente no encontrado',
+  'Patient ID is required when creating appointments for others': 'Se requiere un paciente para asignar el turno',
 
   // Appointment
   'Appointment not found': 'Turno no encontrado',
