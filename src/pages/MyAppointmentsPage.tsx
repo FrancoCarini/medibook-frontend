@@ -422,13 +422,23 @@ export const MyAppointmentsPage: React.FC = () => {
           ) : (
             <Alert severity="info">
               No tienes citas próximas.
-              <Button
-                variant="text"
-                onClick={() => navigate(slug ? `/${slug}/book-appointment` : '/book-appointment')}
-                sx={{ ml: 1 }}
-              >
-                Reservar una cita
-              </Button>
+              {slug ? (
+                <Button
+                  variant="text"
+                  onClick={() => navigate(`/${slug}/book-appointment`)}
+                  sx={{ ml: 1 }}
+                >
+                  Reservar una cita
+                </Button>
+              ) : (
+                <Button
+                  variant="text"
+                  onClick={() => navigate('/clients')}
+                  sx={{ ml: 1 }}
+                >
+                  Elegir un consultorio
+                </Button>
+              )}
             </Alert>
           )}
         </TabPanel>
