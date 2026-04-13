@@ -20,7 +20,8 @@ import {
   Schedule,
   BookOnline,
   History,
-  ExitToApp
+  ExitToApp,
+  Business,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Navigate } from 'react-router-dom';
@@ -47,7 +48,10 @@ export const DashboardPage: React.FC = () => {
       case UserRole.ADMIN:
         return (
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3 }}>
-            <Card>
+            <Card
+              sx={{ cursor: 'pointer', '&:hover': { elevation: 4 } }}
+              onClick={() => navigate('/admin/users')}
+            >
               <CardContent>
                 <Box display="flex" alignItems="center" mb={2}>
                   <People sx={{ mr: 2, color: 'primary.main' }} />
@@ -58,7 +62,10 @@ export const DashboardPage: React.FC = () => {
                 </Typography>
               </CardContent>
             </Card>
-            <Card>
+            <Card
+              sx={{ cursor: 'pointer', '&:hover': { elevation: 4 } }}
+              onClick={() => navigate('/admin/specialties')}
+            >
               <CardContent>
                 <Box display="flex" alignItems="center" mb={2}>
                   <Assignment sx={{ mr: 2, color: 'primary.main' }} />
@@ -69,6 +76,20 @@ export const DashboardPage: React.FC = () => {
                 </Typography>
               </CardContent>
             </Card>
+            <Card
+              sx={{ cursor: 'pointer', '&:hover': { elevation: 4 } }}
+              onClick={() => navigate('/admin/clients')}
+            >
+              <CardContent>
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Business sx={{ mr: 2, color: 'primary.main' }} />
+                  <Typography variant="h6">Clientes</Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Gestionar clientes de la plataforma
+                </Typography>
+              </CardContent>
+            </Card>
             <Card>
               <CardContent>
                 <Box display="flex" alignItems="center" mb={2}>
@@ -76,7 +97,41 @@ export const DashboardPage: React.FC = () => {
                   <Typography variant="h6">Reportes</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary">
-                  Ver estadísticas del sistema
+                  Ver estadísticas del sistema (próximamente)
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+
+      case UserRole.CLIENT_ADMIN:
+        return (
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3 }}>
+            <Card
+              sx={{ cursor: 'pointer', '&:hover': { elevation: 4 } }}
+              onClick={() => navigate('/admin/users')}
+            >
+              <CardContent>
+                <Box display="flex" alignItems="center" mb={2}>
+                  <People sx={{ mr: 2, color: 'primary.main' }} />
+                  <Typography variant="h6">Gestión de Doctores</Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Crear y administrar doctores
+                </Typography>
+              </CardContent>
+            </Card>
+            <Card
+              sx={{ cursor: 'pointer', '&:hover': { elevation: 4 } }}
+              onClick={() => navigate('/admin/specialties')}
+            >
+              <CardContent>
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Assignment sx={{ mr: 2, color: 'primary.main' }} />
+                  <Typography variant="h6">Especialidades</Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  Asignar especialidades a doctores
                 </Typography>
               </CardContent>
             </Card>
@@ -167,6 +222,7 @@ export const DashboardPage: React.FC = () => {
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMIN: return 'Administrador';
+      case UserRole.CLIENT_ADMIN: return 'Admin. de Cliente';
       case UserRole.DOCTOR: return 'Médico';
       case UserRole.PATIENT: return 'Paciente';
       default: return role;

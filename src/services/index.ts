@@ -6,6 +6,7 @@ export { availabilitiesService } from './availabilities';
 export { configAvailabilitiesService } from './configAvailabilities';
 export { appointmentsService } from './appointments';
 export { clientsService } from './clients';
+export { doctorsService } from './doctors';
 export { patientsService } from './patients';
 
 export type { CreateAvailabilityDto, UpdateAvailabilityDto, SearchAvailabilitiesParams } from './availabilities';

@@ -12,10 +12,14 @@ export const usersService = {
     password: string;
     firstName: string;
     lastName: string;
-    role: 'ADMIN' | 'DOCTOR' | 'PATIENT';
+    role: 'ADMIN' | 'CLIENT_ADMIN' | 'DOCTOR' | 'PATIENT';
     doctorData?: {
       licenseNumber: string;
       title: string;
+      clientId: string;
+      specialtyIds?: string[];
+    };
+    clientAdminData?: {
       clientId: string;
     };
   }): Promise<User> {

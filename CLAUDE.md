@@ -234,6 +234,14 @@ En `src/utils/messages.ts`:
 ### Modalidades
 - `IN_PERSON` (Presencial) / `VIRTUAL` (Telemedicina)
 
+## Testing
+
+- Tests unitarios con **Vitest** + **@testing-library/react** + **happy-dom**
+- Cada test file al lado del archivo fuente (`.test.ts` / `.test.tsx`)
+- Correr tests: `npm test`
+- Correr tests en modo watch: `npm run test:watch`
+- Config en `vitest.config.ts`, setup en `src/test/setup.ts`
+
 ## Seguridad
 
 - Tokens JWT con expiración automática

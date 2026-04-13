@@ -16,6 +16,9 @@ import { ClientLoginPage } from './pages/ClientLoginPage';
 import { ClientsIndexPage } from './pages/ClientsIndexPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
+import { AdminSpecialtiesPage } from './pages/AdminSpecialtiesPage';
+import { AdminClientsPage } from './pages/AdminClientsPage';
 
 const theme = createTheme({
   palette: {
@@ -88,6 +91,30 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
                   <AvailabilityManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.CLIENT_ADMIN]}>
+                  <AdminUsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/specialties"
+              element={
+                <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.CLIENT_ADMIN]}>
+                  <AdminSpecialtiesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/clients"
+              element={
+                <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                  <AdminClientsPage />
                 </ProtectedRoute>
               }
             />

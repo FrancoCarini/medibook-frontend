@@ -18,6 +18,7 @@ export enum AppointmentStatus {
 
 export enum UserRole {
   ADMIN = 'ADMIN',
+  CLIENT_ADMIN = 'CLIENT_ADMIN',
   DOCTOR = 'DOCTOR',
   PATIENT = 'PATIENT'
 }
@@ -138,6 +139,10 @@ export interface CreateUserRequest {
   doctorData?: {
     licenseNumber: string;
     title: string;
+    clientId: string;
+    specialtyIds?: string[];
+  };
+  clientAdminData?: {
     clientId: string;
   };
 }

@@ -11,4 +11,9 @@ export const clientsService = {
     const response = await apiService.get<ClientDetail>(`/clients/${slug}`);
     return response;
   },
+
+  async create(data: { name: string; slug: string }): Promise<Client> {
+    const response = await apiService.post<Client>('/clients', data);
+    return response;
+  },
 };
