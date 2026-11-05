@@ -145,7 +145,8 @@ export const AssignAppointmentModal: React.FC<AssignAppointmentModalProps> = ({
           <>
             <Box display="flex" gap={1} mb={2}>
               <TextField
-                label="Buscar paciente por nombre o email"
+                label="Buscar paciente"
+                helperText="Por nombre si ya se atendió en la clínica, o por email completo si es nuevo"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
