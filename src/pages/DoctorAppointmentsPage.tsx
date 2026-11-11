@@ -33,6 +33,7 @@ import {
   Cancel,
   Refresh,
   CheckCircle,
+  EventRepeat,
   FilterList,
   Clear,
   Search
@@ -44,6 +45,7 @@ import { appointmentsService } from '../services/appointments';
 import { AppointmentStatus } from '../types';
 import type { Appointment } from '../types';
 import { MESSAGES } from '../utils/messages';
+import { RescheduleAppointmentModal } from '../components/RescheduleAppointmentModal';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -77,6 +79,7 @@ export const DoctorAppointmentsPage: React.FC = () => {
     open: false,
     appointmentId: null
   });
+  const [rescheduleAppointment, setRescheduleAppointment] = useState<Appointment | null>(null);
   const [completeDialog, setCompleteDialog] = useState<{ open: boolean; appointmentId: string | null }>({
     open: false,
     appointmentId: null
@@ -180,6 +183,12 @@ export const DoctorAppointmentsPage: React.FC = () => {
       console.error('Error al cancelar cita:', error);
       showError(MESSAGES.APPOINTMENT_CANCEL_ERROR);
     }
+  };
+
+  const handleRescheduled = (updated: Appointment) => {
+    setAppointments(prev => prev.map(apt => (apt.id === updated.id ? updated : apt)));
+    setRescheduleAppointment(null);
+    showSuccess(MESSAGES.APPOINTMENT_RESCHEDULED);
   };
 
   const handleCompleteAppointment = async (appointmentId: string) => {
@@ -312,6 +321,16 @@ export const DoctorAppointmentsPage: React.FC = () => {
                       >
                         Completar
                       </Button>
+                      {new Date(appointment.startTime) > new Date() && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<EventRepeat />}
+                          onClick={() => setRescheduleAppointment(appointment)}
+                        >
+                          Reprogramar
+                        </Button>
+                      )}
                       <Button
                         variant="outlined"
                         color="error"
@@ -532,6 +551,12 @@ export const DoctorAppointmentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <RescheduleAppointmentModal
+        open={rescheduleAppointment !== null}
+        appointment={rescheduleAppointment}
+        onClose={() => setRescheduleAppointment(null)}
+        onRescheduled={handleRescheduled}
+      />
     </Box>
   );
 };

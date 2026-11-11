@@ -24,9 +24,11 @@ export interface SearchAvailabilitiesParams {
   doctorId?: string;
   specialtyId?: string;
   mode?: AppointmentMode;
+  status?: AvailabilityStatus;
   startDate?: string;
   endDate?: string;
   all?: boolean;
+  limit?: number;
 }
 
 export const availabilitiesService = {

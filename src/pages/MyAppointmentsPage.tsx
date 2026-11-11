@@ -33,7 +33,8 @@ import {
   Refresh,
   FilterList,
   Clear,
-  Search
+  Search,
+  EventRepeat
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
@@ -42,6 +43,7 @@ import { appointmentsService } from '../services/appointments';
 import { clientsService } from '../services/clients';
 import type { Appointment } from '../types';
 import { MESSAGES } from '../utils/messages';
+import { RescheduleAppointmentModal } from '../components/RescheduleAppointmentModal';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -77,6 +79,7 @@ export const MyAppointmentsPage: React.FC = () => {
     open: false,
     appointmentId: null
   });
+  const [rescheduleAppointment, setRescheduleAppointment] = useState<Appointment | null>(null);
 
   // Pagination state
   const [pagination, setPagination] = useState<{ hasNext: boolean; page: number }>({
@@ -197,6 +200,12 @@ export const MyAppointmentsPage: React.FC = () => {
     }
   };
 
+  const handleRescheduled = (updated: Appointment) => {
+    setAppointments(prev => prev.map(apt => (apt.id === updated.id ? updated : apt)));
+    setRescheduleAppointment(null);
+    showSuccess(MESSAGES.APPOINTMENT_RESCHEDULED);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'BOOKED': return 'success';
@@ -294,15 +303,27 @@ export const MyAppointmentsPage: React.FC = () => {
               />
 
               {appointment.status === 'BOOKED' && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  startIcon={<Cancel />}
-                  onClick={() => setCancelDialog({ open: true, appointmentId: appointment.id })}
-                >
-                  Cancelar
-                </Button>
+                <Stack direction="row" spacing={1}>
+                  {new Date(appointment.startTime) > new Date() && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EventRepeat />}
+                      onClick={() => setRescheduleAppointment(appointment)}
+                    >
+                      Reprogramar
+                    </Button>
+                  )}
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    startIcon={<Cancel />}
+                    onClick={() => setCancelDialog({ open: true, appointmentId: appointment.id })}
+                  >
+                    Cancelar
+                  </Button>
+                </Stack>
               )}
             </Box>
           </Stack>
@@ -499,6 +520,12 @@ export const MyAppointmentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <RescheduleAppointmentModal
+        open={rescheduleAppointment !== null}
+        appointment={rescheduleAppointment}
+        onClose={() => setRescheduleAppointment(null)}
+        onRescheduled={handleRescheduled}
+      />
     </Box>
   );
 };

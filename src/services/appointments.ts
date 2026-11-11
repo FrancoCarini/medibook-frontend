@@ -41,6 +41,13 @@ export const appointmentsService = {
     return response;
   },
 
+  async reschedule(id: string, availabilityId: string): Promise<Appointment> {
+    const response = await apiService.patch<Appointment>(`/appointments/${id}/reschedule`, {
+      availabilityId,
+    });
+    return response;
+  },
+
   async complete(id: string): Promise<Appointment> {
     const response = await apiService.patch<Appointment>(`/appointments/${id}/complete`);
     return response;

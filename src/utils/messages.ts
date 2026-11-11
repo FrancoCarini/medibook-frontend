@@ -22,6 +22,10 @@ export const MESSAGES = {
   APPOINTMENT_COMPLETED: 'Cita marcada como completada',
   APPOINTMENT_COMPLETE_ERROR: 'Error al completar la cita',
   APPOINTMENTS_LOAD_ERROR: 'Error al cargar las citas',
+  APPOINTMENT_RESCHEDULED: 'Turno reprogramado. Te enviamos un correo con el nuevo horario.',
+  APPOINTMENT_RESCHEDULE_ERROR: 'Error al reprogramar el turno',
+  RESCHEDULE_SLOTS_LOAD_ERROR: 'Error al cargar los horarios disponibles',
+  RESCHEDULE_SLOT_TAKEN: 'Ese horario se acaba de ocupar, elegí otro',
 
   // Availability
   AVAILABILITY_DELETED: 'Disponibilidad eliminada correctamente',
@@ -76,6 +80,12 @@ const backendMessages: Record<string, string> = {
   'Availability overlaps with existing one': 'La disponibilidad se superpone con una existente',
   'Availability is already booked': 'La disponibilidad ya está reservada',
   'Availability has been cancelled': 'La disponibilidad ha sido cancelada',
+
+  // Reschedule (MB-24)
+  'Only future booked appointments can be rescheduled': 'Solo se pueden reprogramar turnos confirmados que todavía no pasaron',
+  'The appointment is already in that slot': 'El turno ya está en ese horario',
+  'The new slot must belong to the same doctor': 'El nuevo horario tiene que ser del mismo profesional',
+  'The new slot must be of the same specialty': 'El nuevo horario tiene que ser de la misma especialidad',
 
   // Config Availability
   'Config availability not found': 'Configuración de disponibilidad no encontrada',
