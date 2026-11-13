@@ -43,6 +43,11 @@ export const authService = {
     return response;
   },
 
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const response = await apiService.get<{ message: string }>('/auth/verify-email', { params: { token } });
+    return response;
+  },
+
   async forgotPassword(email: string): Promise<{ message: string }> {
     const response = await apiService.post<{ message: string }>('/auth/forgot-password', { email });
     return response;

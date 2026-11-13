@@ -16,6 +16,7 @@ import { ClientLoginPage } from './pages/ClientLoginPage';
 import { ClientsIndexPage } from './pages/ClientsIndexPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { AdminUsersPage } from './pages/AdminUsersPage';
 import { AdminSpecialtiesPage } from './pages/AdminSpecialtiesPage';
 import { AdminClientsPage } from './pages/AdminClientsPage';
@@ -44,6 +45,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
             {/* Static protected routes */}
             <Route

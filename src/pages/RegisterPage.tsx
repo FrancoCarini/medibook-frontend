@@ -55,6 +55,7 @@ export const RegisterPage: React.FC = () => {
         password,
         firstName,
         lastName,
+        ...(clientSlug && { clientSlug }),
       });
       showSuccess(MESSAGES.REGISTER_SUCCESS);
       navigate(clientSlug ? `/${clientSlug}` : '/login');
