@@ -48,6 +48,14 @@ export const authService = {
     return response;
   },
 
+  async resendVerification(email: string, clientSlug?: string): Promise<{ message: string }> {
+    const response = await apiService.post<{ message: string }>('/auth/resend-verification', {
+      email,
+      ...(clientSlug ? { clientSlug } : {}),
+    });
+    return response;
+  },
+
   async forgotPassword(email: string): Promise<{ message: string }> {
     const response = await apiService.post<{ message: string }>('/auth/forgot-password', { email });
     return response;

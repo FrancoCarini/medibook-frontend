@@ -15,7 +15,10 @@ import { LocalHospital } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import { clientsService } from '../services/clients';
-import { MESSAGES } from '../utils/messages';
+import { MESSAGES, translate } from '../utils/messages';
+import { ResendVerification } from '../components/ResendVerification';
+
+const EMAIL_NOT_VERIFIED = translate('Email not verified. Please check your inbox.');
 import type { ClientDetail } from '../types';
 import { ClientHomePage } from './ClientHomePage';
 
@@ -24,6 +27,8 @@ export const ClientLoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // Email that failed login for not being verified; offers resending while it stays typed.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [client, setClient] = useState<ClientDetail | null>(null);
   const [loadingClient, setLoadingClient] = useState(true);
   const [clientError, setClientError] = useState(false);
@@ -88,7 +93,9 @@ export const ClientLoginPage: React.FC = () => {
       showSuccess(MESSAGES.WELCOME);
       navigate(`/${slug}`);
     } catch (err: any) {
-      showError(err.response?.data?.message || MESSAGES.LOGIN_ERROR);
+      const message = err.response?.data?.message;
+      setUnverifiedEmail(message === EMAIL_NOT_VERIFIED ? email : null);
+      showError(message || MESSAGES.LOGIN_ERROR);
     } finally {
       setIsLoading(false);
     }
@@ -164,6 +171,10 @@ export const ClientLoginPage: React.FC = () => {
               </Typography>
             </Box>
           </Box>
+
+          {unverifiedEmail && unverifiedEmail === email && (
+            <ResendVerification email={unverifiedEmail} clientSlug={slug} />
+          )}
         </Paper>
       </Box>
     </Container>

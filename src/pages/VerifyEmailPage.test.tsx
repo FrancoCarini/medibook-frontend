@@ -1,13 +1,14 @@
 import { StrictMode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { VerifyEmailPage } from './VerifyEmailPage'
 import { authService } from '../services/auth'
 import { MESSAGES, translate } from '../utils/messages'
 
 vi.mock('../services/auth', () => ({
-  authService: { verifyEmail: vi.fn() },
+  authService: { verifyEmail: vi.fn(), resendVerification: vi.fn() },
 }))
 
 const verifyEmail = vi.mocked(authService.verifyEmail)
@@ -73,6 +74,28 @@ describe('VerifyEmailPage', () => {
       'href',
       '/clinica-norte',
     )
+  })
+
+  it("offers resending the email with the link's clinic when the token is invalid", async () => {
+    verifyEmail.mockRejectedValue(apiError('Invalid or expired verification token'))
+    vi.mocked(authService.resendVerification).mockResolvedValue({ message: 'ok' })
+
+    renderAt('/verify-email?token=bad&client=clinica-norte')
+
+    await screen.findByText(MESSAGES.VERIFY_EMAIL_INVALID)
+    await userEvent.type(screen.getByLabelText(/Email/), 'jane@test.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Reenviar mail de verificación' }))
+
+    expect(authService.resendVerification).toHaveBeenCalledWith('jane@test.com', 'clinica-norte')
+  })
+
+  it('does not offer resending when the verification succeeds', async () => {
+    verifyEmail.mockResolvedValue({ message: 'Email verified' })
+
+    renderAt('/verify-email?token=tok-1')
+
+    await screen.findByText(MESSAGES.VERIFY_EMAIL_SUCCESS)
+    expect(screen.queryByRole('button', { name: 'Reenviar mail de verificación' })).not.toBeInTheDocument()
   })
 
   it('shows the error without calling the backend when there is no token', () => {

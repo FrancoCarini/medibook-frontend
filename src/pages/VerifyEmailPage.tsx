@@ -13,6 +13,7 @@ import {
 import { LocalHospital } from '@mui/icons-material';
 import { authService } from '../services/auth';
 import { MESSAGES, translate } from '../utils/messages';
+import { ResendVerification } from '../components/ResendVerification';
 
 type Status = 'loading' | 'success' | 'already' | 'error';
 
@@ -76,6 +77,7 @@ export const VerifyEmailPage: React.FC = () => {
               <Alert severity="error" sx={{ mt: 2 }}>
                 {MESSAGES.VERIFY_EMAIL_INVALID}
               </Alert>
+              <ResendVerification clientSlug={clientSlug} />
               <Box sx={{ textAlign: 'center', mt: 2 }}>
                 <Link component={RouterLink} to={loginPath} underline="hover">
                   Volver a iniciar sesión

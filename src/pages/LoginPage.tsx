@@ -14,12 +14,17 @@ import { LocalHospital } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useUI } from '../contexts/UIContext';
 import { UserRole } from '../types';
-import { MESSAGES } from '../utils/messages';
+import { MESSAGES, translate } from '../utils/messages';
+import { ResendVerification } from '../components/ResendVerification';
+
+const EMAIL_NOT_VERIFIED = translate('Email not verified. Please check your inbox.');
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // Email that failed login for not being verified; offers resending while it stays typed.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   
   const { login, isAuthenticated, user } = useAuth();
   const { showError, showSuccess } = useUI();
@@ -48,7 +53,9 @@ export const LoginPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      showError(err.response?.data?.message || MESSAGES.LOGIN_ERROR);
+      const message = err.response?.data?.message;
+      setUnverifiedEmail(message === EMAIL_NOT_VERIFIED ? email : null);
+      showError(message || MESSAGES.LOGIN_ERROR);
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +136,10 @@ export const LoginPage: React.FC = () => {
               </Typography>
             </Box>
           </Box>
+
+          {unverifiedEmail && unverifiedEmail === email && (
+            <ResendVerification email={unverifiedEmail} />
+          )}
         </Paper>
       </Box>
     </Container>
