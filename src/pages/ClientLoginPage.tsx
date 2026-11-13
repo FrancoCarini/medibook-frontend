@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useParams, Navigate, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -19,7 +19,7 @@ import { MESSAGES, translate } from '../utils/messages';
 import { ResendVerification } from '../components/ResendVerification';
 
 const EMAIL_NOT_VERIFIED = translate('Email not verified. Please check your inbox.');
-import type { ClientDetail } from '../types';
+import { UserRole, type ClientDetail } from '../types';
 import { ClientHomePage } from './ClientHomePage';
 
 export const ClientLoginPage: React.FC = () => {
@@ -33,7 +33,7 @@ export const ClientLoginPage: React.FC = () => {
   const [loadingClient, setLoadingClient] = useState(true);
   const [clientError, setClientError] = useState(false);
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const { showError, showSuccess } = useUI();
   const navigate = useNavigate();
 
@@ -53,6 +53,10 @@ export const ClientLoginPage: React.FC = () => {
   }, [slug]);
 
   if (isAuthenticated && slug) {
+    // The clinic home is for patients; staff go to their own panel (replace: no back-button bounce).
+    if (user?.role !== UserRole.PATIENT) {
+      return <Navigate to="/dashboard" replace />;
+    }
     return <ClientHomePage />;
   }
 

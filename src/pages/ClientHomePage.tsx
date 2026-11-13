@@ -23,6 +23,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { clientsService } from '../services/clients';
 import type { ClientDetail } from '../types';
+import { getRoleLabel } from '../utils/roles';
 
 export const ClientHomePage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -74,7 +75,7 @@ export const ClientHomePage: React.FC = () => {
             <Typography variant="body2">
               {user?.firstName} {user?.lastName}
             </Typography>
-            <Chip label="Paciente" size="small" color="secondary" />
+            {user && <Chip label={getRoleLabel(user.role)} size="small" color="secondary" />}
             <IconButton color="inherit" onClick={handleLogout}>
               <ExitToApp />
             </IconButton>

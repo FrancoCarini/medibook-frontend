@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { UserRole } from '../types';
+import { getRoleLabel } from '../utils/roles';
 
 export const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -216,16 +217,6 @@ export const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
         );
-    }
-  };
-
-  const getRoleLabel = (role: UserRole) => {
-    switch (role) {
-      case UserRole.ADMIN: return 'Administrador';
-      case UserRole.CLIENT_ADMIN: return 'Admin. de Cliente';
-      case UserRole.DOCTOR: return 'Médico';
-      case UserRole.PATIENT: return 'Paciente';
-      default: return role;
     }
   };
 
